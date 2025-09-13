@@ -1,0 +1,39 @@
+controllers
+├── admin-controller.js
+├── auth-controller.js
+├── availability-controller.js
+├── chat-controller.js
+├── comment-controller.js
+├── history-controller.js
+└── station-controller.js
+middlewares
+├── auth-middleware.js
+└── validate.js
+models
+├── availability-model.js
+├── chatmessage-model.js
+├── comment-model.js
+├── history-model.js
+├── station-model.js
+└── user-model.js
+package.json  
+package-lock.json
+routers
+├── admin-router.js
+├── auth-router.js
+├── availability-router.js
+├── chat-router.js
+├── comment-router.js
+├── history-router.js
+└── station-router.js
+server.js
+utils
+└── db.js
+validators
+├── auth-validator.js
+├── availability-validator.js
+├── chat-validator.js
+├── comment-validator.js
+└── station-validator.js
+
+6 directories, 31 files
