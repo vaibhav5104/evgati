@@ -9,6 +9,22 @@ import {
   Register,
   Dashboard,
   Stations,
+  StationDetails,
+  Profile,
+  AddStation,
+  BookingPage,
+  AdminDashboard,
+  ManageStations,
+  ManageUsers,
+  PendingApprovals,
+  SystemHistory,
+  OwnerDashboard,
+  MyStations,
+  StationRequests,
+  Analytics,
+  OwnerHistory,
+  Bookings,
+  BookingHistory,
 } from './pages';
 
 // Error boundary component
@@ -42,7 +58,7 @@ const Unauthorized = () => (
   </div>
 );
 
-const App = () => {
+export const App = () => {
   return (
     <ErrorBoundary>
       <AuthProvider>
@@ -51,8 +67,9 @@ const App = () => {
             {/* Public routes with MainLayout */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Home />} />
-              <Route path="stations" element={<Stations />} />
-              <Route path="stations/:id" element={<div>Station Details - TODO</div>} />
+            <Route path="stations" element={<Stations />} />
+            <Route path="stations/:id" element={<StationDetails />} />
+            <Route path="stations/:id/book" element={<BookingPage />} />
             </Route>
 
             {/* Auth routes with AuthLayout */}
@@ -84,7 +101,8 @@ const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }>
-              <Route index element={<div>My Bookings - TODO</div>} />
+              <Route index element={<Bookings />} />
+              <Route path="history" element={<BookingHistory />} />
             </Route>
 
             <Route path="/profile" element={
@@ -92,7 +110,7 @@ const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }>
-              <Route index element={<div>Profile - TODO</div>} />
+              <Route index element={<Profile />} />
             </Route>
 
             <Route path="/add-station" element={
@@ -100,7 +118,7 @@ const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }>
-              <Route index element={<div>Add Station - TODO</div>} />
+              <Route index element={<AddStation />} />
             </Route>
 
             {/* Admin routes */}
@@ -109,10 +127,11 @@ const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }>
-              <Route index element={<div>Admin Dashboard - TODO</div>} />
-              <Route path="stations" element={<div>Manage Stations - TODO</div>} />
-              <Route path="users" element={<div>Manage Users - TODO</div>} />
-              <Route path="pending" element={<div>Pending Approvals - TODO</div>} />
+              <Route index element={<AdminDashboard />} />
+              <Route path="stations" element={<ManageStations />} />
+              <Route path="users" element={<ManageUsers />} />
+              <Route path="pending" element={<PendingApprovals />} />
+              <Route path="history" element={<SystemHistory />} />
             </Route>
 
             {/* Owner routes */}
@@ -121,10 +140,11 @@ const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }>
-              <Route index element={<div>Owner Dashboard - TODO</div>} />
-              <Route path="stations" element={<div>My Stations - TODO</div>} />
-              <Route path="requests" element={<div>Booking Requests - TODO</div>} />
-              <Route path="analytics" element={<div>Analytics - TODO</div>} />
+              <Route index element={<OwnerDashboard />} />
+              <Route path="stations" element={<MyStations />} />
+              <Route path="requests" element={<StationRequests />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="history" element={<OwnerHistory />} />
             </Route>
 
             {/* Error routes */}

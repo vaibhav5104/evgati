@@ -1,48 +1,72 @@
-import axios from "axios";
-import { useAuth } from "../store/auth";
+import api  from './api';
 
-export const availabilityService = () => {
-  const { API } = useAuth();
-  const API_URL = `${API}/api/availability`;
+export const availabilityService = {
+  // 🔹 Get live availability (only accepted bookings)
+  async getAvailability(stationId) {
+    try {
+      const response = await api.get(`/availability/${stationId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+      throw error;
+    }
+  },
 
-  return {
-    // 🔹 Get live availability (only accepted bookings)
-    getAvailability: async (stationId) => {
-      const res = await axios.get(`${API_URL}/${stationId}`);
-      return res.data;
-    },
+  // 🔹 User: Send booking request
+  async requestBooking(data) {
+    try {
+      const response = await api.post('/availability/book', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error requesting booking:', error);
+      throw error;
+    }
+  },
 
-    // 🔹 User: Send booking request
-    requestBooking: async (data) => {
-      const res = await axios.post(`${API_URL}/book`, data);
-      return res.data;
-    },
+  // 🔹 User: Get all booking requests (pending/accepted/rejected)
+  async getUserRequests() {
+    try {
+      const response = await api.get('/availability/my-requests');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user requests:', error);
+      throw error;
+    }
+  },
 
-    // 🔹 User: Get all booking requests (pending/accepted/rejected)
-    getUserRequests: async () => {
-      const res = await axios.get(`${API_URL}/my-requests`);
-      return res.data;
-    },
+  // 🔹 Owner/Admin: Get pending requests for a station
+  async getPendingRequests(stationId) {
+    try {
+      const response = await api.get(`/availability/${stationId}/requests`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching pending requests:', error);
+      throw error;
+    }
+  },
 
-    // 🔹 Owner/Admin: Get pending requests for a station
-    getPendingRequests: async (stationId) => {
-      const res = await axios.get(`${API_URL}/${stationId}/requests`);
-      return res.data;
-    },
-
-    // 🔹 Owner/Admin: Respond to a booking request
-    respondBookingRequest: async (stationId, bookingId, status, ownerMessage = "") => {
-      const res = await axios.patch(`${API_URL}/${stationId}/respond/${bookingId}`, {
+  // 🔹 Owner/Admin: Respond to a booking request
+  async respondBookingRequest(stationId, bookingId, status, ownerMessage = "") {
+    try {
+      const response = await api.patch(`/availability/${stationId}/respond/${bookingId}`, {
         status,
         ownerMessage
       });
-      return res.data;
-    },
-
-    // 🔹 Admin/Owner: Clear expired bookings
-    clearExpiredBookings: async (stationId) => {
-      const res = await axios.delete(`${API_URL}/${stationId}/clear`);
-      return res.data;
+      return response.data;
+    } catch (error) {
+      console.error('Error responding to booking request:', error);
+      throw error;
     }
-  };
+  },
+
+  // 🔹 Admin/Owner: Clear expired bookings
+  async clearExpiredBookings(stationId) {
+    try {
+      const response = await api.delete(`/availability/${stationId}/clear`);
+      return response.data;
+    } catch (error) {
+      console.error('Error clearing expired bookings:', error);
+      throw error;
+    }
+  }
 };
