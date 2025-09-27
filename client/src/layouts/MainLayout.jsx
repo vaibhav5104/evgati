@@ -22,7 +22,7 @@ const MainLayout = () => {
               <h4 className="text-sm font-semibold text-gray-700 mb-3">Quick Links</h4>
               <ul className="space-y-2">
                 <li><a href="/stations" className="text-sm text-gray-600 hover:text-gray-900">Charging Stations</a></li>
-                <li><a href="/bookings" className="text-sm text-gray-600 hover:text-gray-900">My Bookings</a></li>
+                <li><a href="/my-bookings" className="text-sm text-gray-600 hover:text-gray-900">My Bookings</a></li>
                 <li><a href="/about" className="text-sm text-gray-600 hover:text-gray-900">About Us</a></li>
               </ul>
             </div>

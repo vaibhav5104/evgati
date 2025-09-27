@@ -30,8 +30,19 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 
 // ---- Middlewares ----
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+const corsOptions = {
+    origin: process.env.FRONTEND_URL,
+    methods: "GET,POST,PUT,DELETE,PATCH,HEAD",
+    credentials: true
+};
+console.log("Frontend env is : ",process.env.FRONTEND_URL)
+
+app.use(cors(corsOptions));
+// app.options("*", cors(corsOptions)); // Handles preflight requests for all routes
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // ---- API Routes ----
 app.use("/api/auth", authRouter);

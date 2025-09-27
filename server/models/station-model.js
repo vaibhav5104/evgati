@@ -44,9 +44,9 @@ stationSchema.index(
   { unique: true }
 );
 
-stationSchema.index(
-  { "location.address": 1 },
-  { unique: true }
-);
+// stationSchema.index(
+//   { "location.address": 1 },
+//   { unique: true }
+// );
 
 module.exports = mongoose.model("Station", stationSchema);

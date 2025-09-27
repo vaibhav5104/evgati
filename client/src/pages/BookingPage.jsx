@@ -48,6 +48,8 @@ const BookingPage = () => {
       
       setStation(stationData);
       setAvailability(availabilityData);
+      console.log("Station Data:", stationData);
+      console.log("Availability Data:", availabilityData);
       setError(null);
     } catch (err) {
       setError("Failed to fetch station data");

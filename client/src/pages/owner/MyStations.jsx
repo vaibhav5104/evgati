@@ -18,13 +18,13 @@ const MyStations = () => {
     setLoading(true);
     try {
       const data = await stationService.getAllStations();
-      console.log("All stations:", data);
-      console.log("Current user ID:", user._id);
+      // console.log("All stations:", data);
+      // console.log("Current user ID:", user._id);
       
       // Debug: Log each station's owner
-      data.forEach(station => {
-        console.log(`Station: ${station.name}, Owner: ${station.owner}, Match: ${station.owner === user._id}`);
-      });
+      // data.forEach(station => {
+        // console.log(`Station: ${station.name}, Owner: ${station.owner}, Match: ${station.owner === user._id}`);
+      // });
       
       const myStations = data.filter(station => {
         // Handle both string and ObjectId comparisons
@@ -33,7 +33,7 @@ const MyStations = () => {
         return stationOwner === currentUserId;
       });
       
-      console.log("Filtered stations:", myStations);
+      // console.log("Filtered stations:", myStations);
       setStations(myStations);
       setError(null);
     } catch (err) {

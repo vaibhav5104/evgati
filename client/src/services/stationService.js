@@ -7,6 +7,12 @@ export const stationService = {
     return response.data;
   },
 
+  // Get all pending stations (public)
+  getAllPendingStations: async () => {
+    const response = await api.get('/api/stations/pending');
+    return response.data;
+  },
+
   // Get station by ID (public)
   getStationById: async (id) => {
     const response = await api.get(`/api/stations/${id}`);

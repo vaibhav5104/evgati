@@ -127,7 +127,7 @@ export const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }>
-              <Route index element={<AdminDashboard />} />
+              <Route path="any" element={<AdminDashboard />} />
               <Route path="stations" element={<ManageStations />} />
               <Route path="users" element={<ManageUsers />} />
               <Route path="pending" element={<PendingApprovals />} />

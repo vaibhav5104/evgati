@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { commentService } from "../../services/commentService";
 import Button from "../ui/Button";
+import { toast } from "react-toastify";
+import { useAuth } from "../../hooks/useAuth";
 
 const CommentForm = ({ stationId, userId, onSuccess }) => {
   const [form, setForm] = useState({
@@ -8,18 +10,27 @@ const CommentForm = ({ stationId, userId, onSuccess }) => {
     text: ""
   });
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
+  // In your component
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await commentService.createComment(stationId, userId, form);
-      onSuccess?.();
+      await commentService.addComment({
+        stationId,
+        userId: user._id,
+        text: form.text.trim(),
+        rating: parseInt(form.rating)
+      });
+      toast.success("Comment added successfully!");
       setForm({ rating: 5, text: "" });
+      onSuccess?.();
     } catch (error) {
-      console.error("Comment error:", error);
+      toast.error(error.message || "Failed to add comment");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -31,11 +42,11 @@ const CommentForm = ({ stationId, userId, onSuccess }) => {
           value={form.rating}
           onChange={(e) => setForm({...form, rating: parseInt(e.target.value)})}
         >
-          <option value={1}>1 Star</option>
-          <option value={2}>2 Stars</option>
-          <option value={3}>3 Stars</option>
-          <option value={4}>4 Stars</option>
-          <option value={5}>5 Stars</option>
+          <option value={1}>1</option>
+          <option value={2}>2</option>
+          <option value={3}>3</option>
+          <option value={4}>4</option>
+          <option value={5}>5</option>
         </select>
       </div>
       <div>

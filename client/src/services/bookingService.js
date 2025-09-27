@@ -4,7 +4,7 @@ export const bookingService = {
   // Book a charging port
   bookPort: async (bookingData) => {
     try {
-      const response = await api.post('/availability/book', bookingData);
+      const response = await api.post('/api/availability/book', bookingData);
       return response.data;
     } catch (error) {
       console.error('Booking port error:', error.response?.data || error.message);
@@ -15,7 +15,7 @@ export const bookingService = {
   // Get user's booking requests
   getUserRequests: async () => {
     try {
-      const response = await api.get('/availability/myrequests');
+      const response = await api.get('/api/availability/myrequests');
       return response.data;
     } catch (error) {
       console.error('Get user requests error:', error.response?.data || error.message);
@@ -26,7 +26,7 @@ export const bookingService = {
   // Get availability for a station
   getAvailability: async (stationId) => {
     try {
-      const response = await api.get(`/availability/${stationId}`);
+      const response = await api.get(`/api/availability/${stationId}`);
       return response.data;
     } catch (error) {
       console.error('Get availability error:', error.response?.data || error.message);
@@ -37,7 +37,8 @@ export const bookingService = {
   // Get pending requests for station (owner/admin)
   getPendingRequests: async (stationId) => {
     try {
-      const response = await api.get(`/availability/${stationId}/requests`);
+      const response = await api.get(`/api/availability/${stationId}/requests`);
+      // console.log(response.data)
       return response.data;
     } catch (error) {
       console.error('Get pending requests error:', error.response?.data || error.message);
@@ -48,7 +49,8 @@ export const bookingService = {
   // Get station bookings (alias for getPendingRequests)
   getStationBookings: async (stationId) => {
     try {
-      const response = await api.get(`/availability/${stationId}/requests`);
+      const response = await api.get(`/api/availability/${stationId}/requests`);
+      // console.log(response.data)
       return response.data;
     } catch (error) {
       console.error('Get station bookings error:', error.response?.data || error.message);
@@ -59,7 +61,7 @@ export const bookingService = {
   // Approve booking request
   approveBooking: async (stationId, bookingId, ownerMessage = '') => {
     try {
-      const response = await api.patch(`/availability/${stationId}/approve/${bookingId}`, {
+      const response = await api.patch(`/api/availability/${stationId}/approve/${bookingId}`, {
         ownerMessage
       });
       return response.data;
@@ -72,7 +74,7 @@ export const bookingService = {
   // Reject booking request
   rejectBooking: async (stationId, bookingId, ownerMessage = '') => {
     try {
-      const response = await api.patch(`/availability/${stationId}/reject/${bookingId}`, {
+      const response = await api.patch(`/api/availability/${stationId}/reject/${bookingId}`, {
         ownerMessage
       });
       return response.data;
@@ -85,7 +87,7 @@ export const bookingService = {
   // Clear expired bookings
   clearExpiredBookings: async (stationId) => {
     try {
-      const response = await api.delete(`/availability/${stationId}/clear`);
+      const response = await api.delete(`/api/availability/${stationId}/clear`);
       return response.data;
     } catch (error) {
       console.error('Clear expired bookings error:', error.response?.data || error.message);
@@ -96,7 +98,7 @@ export const bookingService = {
   // Create booking request (alias for bookPort)
   createBooking: async (bookingData) => {
     try {
-      const response = await api.post('/availability/book', bookingData);
+      const response = await api.post('/api/availability/book', bookingData);
       return response.data;
     } catch (error) {
       console.error('Create booking error:', error.response?.data || error.message);
@@ -104,35 +106,30 @@ export const bookingService = {
     }
   },
 
-  // Get user's booking requests (alias for getUserRequests)
-  getUserBookings: async () => {
-    try {
-      const response = await api.get("/api/availability/myrequests");
-  
-      // Normalize the response to always return an array
-      const bookings =
-        response.data?.requests ||
-        response.data?.bookings ||
-        response.data ||
-        [];
-  
-      console.log("User bookings response:", bookings);
-  
-      return Array.isArray(bookings) ? bookings : [];
-    } catch (error) {
-      console.error(
-        "Get user bookings error:",
-        error.response?.data || error.message
-      );
-      throw error;
-    }
-  },
+// Get user's booking requests
+getUserBookings: async () => {
+  try {
+    const response = await api.get("/api/availability/myrequests");
+
+    // Always normalize to array
+    const requests = response.data?.requests || [];
+    console.log("User bookings response:", requests);
+
+    return Array.isArray(requests) ? requests : [];
+  } catch (error) {
+    console.error(
+      "Get user bookings error:",
+      error.response?.data || error.message
+    );
+    return []; // fallback safe return
+  }
+},
   
 
   // Get station availability (alias for getAvailability)
   getStationAvailability: async (stationId) => {
     try {
-      const response = await api.get(`/availability/${stationId}`);
+      const response = await api.get(`/api/availability/${stationId}`);
       return response.data;
     } catch (error) {
       console.error('Get station availability error:', error.response?.data || error.message);
@@ -143,7 +140,7 @@ export const bookingService = {
   // Cancel booking (uses reject endpoint with cancel message)
   cancelBooking: async (stationId, bookingId) => {
     try {
-      const response = await api.patch(`/availability/${stationId}/reject/${bookingId}`, { 
+      const response = await api.patch(`/api/availability/${stationId}/reject/${bookingId}`, { 
         ownerMessage: 'Cancelled by user' 
       });
       return response.data;

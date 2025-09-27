@@ -13,8 +13,7 @@ const createStation = async (req, res) => {
 
     const existing = await Station.findOne({
       $or: [
-        { "location.latitude": latitude, "location.longitude": longitude },
-        { "location.address": address }
+        { "location.latitude": latitude, "location.longitude": longitude }
       ]
     });
     if (existing) {
@@ -68,6 +67,23 @@ const getStationById = async (req, res) => {
     res.json(station);
   } catch (error) {
     res.status(500).json({ message: "Error fetching station", error: error.message });
+  }
+};
+
+// Get all pending stations (only accepted for normal users)
+const getAllPendingStations = async (req, res) => {
+  try {
+    let query = { status: "pending" };
+
+    // if request has user and user is admin, allow all
+    if (req.user && req.user.role === "admin") {
+      query = {};
+    }
+
+    const stations = await Station.find(query);
+    res.json(stations);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching stations", error: error.message });
   }
 };
 
@@ -201,6 +217,7 @@ module.exports = {
   createStation,
   getAllStations,
   getStationById,
+  getAllPendingStations,
   updateStation,
   deleteStation,
   findNearestStation

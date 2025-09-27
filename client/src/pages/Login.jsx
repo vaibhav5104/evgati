@@ -18,7 +18,8 @@ const Login = () => {
   const location = useLocation();
   const { login, loginWithGoogle } = useAuth();
   
-  const from = location.state?.from?.pathname || "/dashboard";
+  // const from = location.state?.from?.pathname || "/dashboard";
+  const from =  "/";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -136,8 +137,10 @@ const Login = () => {
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => toast.error('Google login failed')}
-                size="large"
-                width="100%"
+                useOneTap
+                theme="outline"
+                text="signin_with"
+                shape="rectangular"
               />
             </div>
           </div>

@@ -4,7 +4,7 @@ export const chatService = {
   // Get messages for a station
   async getMessages(stationId) {
     try {
-      const response = await api.get(`/chat/messages/${stationId}`);
+      const response = await api.get(`api/chat/messages/${stationId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -15,7 +15,7 @@ export const chatService = {
   // Send a message
   async sendMessage(stationId, userId, message) {
     try {
-      const response = await api.post('/chat/send', {
+      const response = await api.post('api/chat/send', {
         stationId,
         userId,
         message,
@@ -31,7 +31,7 @@ export const chatService = {
   // Get chat history for a user
   async getChatHistory(userId) {
     try {
-      const response = await api.get(`/chat/history/${userId}`);
+      const response = await api.get(`api/chat/history/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching chat history:', error);
@@ -42,7 +42,7 @@ export const chatService = {
   // Mark messages as read
   async markAsRead(stationId, userId) {
     try {
-      const response = await api.put(`/chat/read/${stationId}`, { userId });
+      const response = await api.put(`api/chat/read/${stationId}`, { userId });
       return response.data;
     } catch (error) {
       console.error('Error marking messages as read:', error);

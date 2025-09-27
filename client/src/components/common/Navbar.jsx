@@ -2,11 +2,42 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../ui/Button';
+import NotificationDropdown from '../navbar/NotificationDropdown';
+import { Bell } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, LogoutUser, userNotifications, ownerNotifications, adminNotifications } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  // Calculate total notification count based on user role
+  const getTotalNotificationCount = () => {
+    if (!user) return 0;
+    // console.log('userNotifications.userRequestsLength :',userNotifications.userRequestsLength)
+    // console.log('userNotifications.approvedRequestsLength :',userNotifications.approvedRequestsLength)
+    // console.log('userNotifications.rejectedRequestsLength :',userNotifications.rejectedRequestsLength)
+
+    switch (user.role) {
+      case 'user':
+        return (
+          userNotifications.approvedRequestsLength + 
+          userNotifications.rejectedRequestsLength
+        );
+      case 'owner':
+        // console.log('Owner notificaitons',ownerNotifications)
+        return (
+          ownerNotifications.total
+        );
+      case 'admin':
+        return (
+          adminNotifications.totalPendingActionsLength
+        );
+      default:
+        return 0;
+    }
+    
+  };
 
   const navLinks = [
     { label: 'Home', path: '/', roles: ['user', 'admin', 'owner'] },
@@ -14,19 +45,19 @@ const Navbar = () => {
     { 
       label: 'Dashboard', 
       path: user?.role === 'admin' 
-        ? '/admin/dashboard' 
+        ? '/dashboard' 
         : user?.role === 'owner' 
-          ? '/owner/dashboard' 
+          ? '/dashboard' 
           : '/dashboard', 
       roles: ['user', 'admin', 'owner'] 
     },
-    { label: 'My Bookings', path: '/bookings', roles: ['user'] },
+    { label: 'My Bookings', path: '/my-bookings', roles: ['user'] },
     { label: 'Manage Stations', path: '/owner/stations', roles: ['owner'] },
-    { label: 'Admin Panel', path: '/admin/dashboard', roles: ['admin'] }
+    { label: 'Admin Panel', path: '/admin/panel', roles: ['admin'] }
   ];
 
   const handleLogout = () => {
-    logout();
+    LogoutUser();
     navigate('/login');
   };
 
@@ -69,6 +100,27 @@ const Navbar = () => {
             <div className="ml-4 flex items-center md:ml-6">
               {user ? (
                 <div className="flex items-center space-x-4">
+                  {/* Notification Bell */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                      className="text-gray-600 hover:text-gray-900 relative"
+                    >
+                      <Bell className="w-6 h-6" />
+                      {getTotalNotificationCount() > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                          {getTotalNotificationCount()}
+                        </span>
+                      )}
+                    </button>
+                    {isNotificationOpen && (
+                      <NotificationDropdown 
+                        isOpen={isNotificationOpen} 
+                        onClose={() => setIsNotificationOpen(false)} 
+                      />
+                    )}
+                  </div>
+
                   <Link 
                     to="/profile" 
                     className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900"

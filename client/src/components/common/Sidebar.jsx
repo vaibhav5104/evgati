@@ -7,7 +7,7 @@ const Sidebar = () => {
   const location = useLocation();
 
   const adminLinks = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: 'dashboard' },
+    // { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
     { label: 'Manage Stations', path: '/admin/stations', icon: 'stations' },
     { label: 'Manage Users', path: '/admin/users', icon: 'users' },
     { label: 'Pending Approvals', path: '/admin/approvals', icon: 'pending' },
@@ -15,7 +15,7 @@ const Sidebar = () => {
   ];
 
   const ownerLinks = [
-    { label: 'Dashboard', path: '/owner/dashboard', icon: 'dashboard' },
+    // { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
     { label: 'My Stations', path: '/owner/stations', icon: 'stations' },
     { label: 'Station Requests', path: '/owner/requests', icon: 'requests' },
     { label: 'Analytics', path: '/owner/analytics', icon: 'analytics' },
@@ -23,9 +23,9 @@ const Sidebar = () => {
   ];
 
   const userLinks = [
-    { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
+    // { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
     { label: 'Stations', path: '/stations', icon: 'stations' },
-    { label: 'My Bookings', path: '/bookings', icon: 'bookings' },
+    { label: 'My Bookings', path: '/my-bookings', icon: 'bookings' },
     { label: 'Profile', path: '/profile', icon: 'profile' }
   ];
 

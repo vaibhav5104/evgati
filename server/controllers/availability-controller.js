@@ -208,7 +208,7 @@ const getPendingRequests = async (req, res) => {
     );
 
     res.json({
-      station: station.name,
+      station: station._id,
       pendingRequests,
       count: pendingRequests.length
     });

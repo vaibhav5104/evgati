@@ -11,6 +11,7 @@ router.post("/", authMiddleware, validate(createStationSchema), stationControlle
 
 // Public read (only accepted shown)
 router.get("/", stationController.getAllStations);
+router.get("/pending", stationController.getAllPendingStations);
 router.get("/nearest/search", stationController.findNearestStation);
 router.get("/:id", stationController.getStationById);
 

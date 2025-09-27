@@ -25,7 +25,7 @@ const StationRequests = () => {
         station.owner && station.owner.toString() === user._id.toString()
       );
 
-      console.log("Owner's stations:", ownerStations);
+      // console.log("Owner's stations:", ownerStations);
 
       if (ownerStations.length === 0) {
         setRequests([]);
@@ -39,7 +39,7 @@ const StationRequests = () => {
       for (const station of ownerStations) {
         try {
           const stationRequests = await bookingService.getStationBookings(station._id);
-          console.log(`Requests for station ${station.name}:`, stationRequests);
+          // console.log(`Requests for station ${station.name}:`, stationRequests);
           
           // Add station info to each request
           const requestsWithStationInfo = (stationRequests.pendingRequests || []).map(request => ({
@@ -55,7 +55,7 @@ const StationRequests = () => {
         }
       }
 
-      console.log("All combined requests:", allRequests);
+      // console.log("All combined requests:", allRequests);
       setRequests(allRequests);
       setError(null);
     } catch (err) {
