@@ -4,7 +4,7 @@ export const historyService = {
   // 🧑 User: Get their booking history
   async getUserHistory() {
     try {
-      const response = await api.get('/history/user');
+      const response = await api.get('api/history/user');
       return response.data;
     } catch (error) {
       console.error('Error fetching user history:', error);
@@ -15,7 +15,7 @@ export const historyService = {
   // 👨‍💼 Owner: Get history of owned stations
   async getOwnerHistory() {
     try {
-      const response = await api.get('/history/owner');
+      const response = await api.get('api/history/owner');
       return response.data;
     } catch (error) {
       console.error('Error fetching owner history:', error);
@@ -26,7 +26,7 @@ export const historyService = {
   // 🛡️ Admin: Get full booking history
   async getAdminHistory() {
     try {
-      const response = await api.get('/history/admin');
+      const response = await api.get('api/history/admin');
       return response.data;
     } catch (error) {
       console.error('Error fetching admin history:', error);
@@ -37,7 +37,7 @@ export const historyService = {
   // 📍 Optional: Fetch history of a specific station (admin/owner only)
   async getStationHistory(stationId) {
     try {
-      const response = await api.get(`/history/station/${stationId}`);
+      const response = await api.get(`api/history/station/${stationId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching station history:', error);

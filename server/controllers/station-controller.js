@@ -1,6 +1,7 @@
 const Station = require("../models/station-model");
 const User = require("../models/user-model");
 const Availability = require("../models/availability-model");
+const availabilityController = require("../controllers/availability-controller")
 
 // Create a new station (goes to pending)
 const createStation = async (req, res) => {
@@ -53,7 +54,9 @@ const getAllStations = async (req, res) => {
     }
 
     const stations = await Station.find(query);
+
     res.json(stations);
+
   } catch (error) {
     res.status(500).json({ message: "Error fetching stations", error: error.message });
   }

@@ -1,315 +1,528 @@
-import React, { useEffect, useState } from "react";
-import { toast } from 'react-toastify';
-import { useAuth } from "../../hooks/useAuth";
-import Card from "../../components/ui/Card";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
+  AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+} from 'recharts';
+import { 
+  Calendar, TrendingUp, Users, Star, Clock, DollarSign, 
+  Battery, MapPin, Activity, AlertCircle, ChevronDown,
+  Check, X, Loader2, Filter, Download, RefreshCw
+} from 'lucide-react';
+import { authService } from '../../services/authService';
+import { commentService } from '../../services/commentService';
+import { stationService } from '../../services/stationService';
+import { historyService } from '../../services/historyService';
+
 
 const Analytics = () => {
-  const { user } = useAuth();
-  const [analytics, setAnalytics] = useState({
-    revenue: { total: 0, monthly: [] },
-    bookings: { total: 0, completed: 0, pending: 0 },
-    stations: { total: 0, active: 0, inactive: 0 },
-    ratings: { average: 0, count: 0 }
-  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [timeRange, setTimeRange] = useState('30d'); // 7d, 30d, 90d, 1y
+  const [timeRange, setTimeRange] = useState('monthly');
+  const [selectedStation, setSelectedStation] = useState('all');
+  const [analyticsData, setAnalyticsData] = useState({
+    owner: null,
+    history: [],
+    stations: [],
+    comments: [],
+    stationDetails: {}
+  });
 
-  const fetchAnalytics = async () => {
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, []);
+
+  const fetchAnalyticsData = async () => {
     setLoading(true);
     try {
-      // Mock data - replace with real API call
-      const mockData = {
-        revenue: {
-          total: 12500,
-          monthly: [
-            { month: 'Jan', amount: 1200 },
-            { month: 'Feb', amount: 1500 },
-            { month: 'Mar', amount: 1800 },
-            { month: 'Apr', amount: 2200 },
-            { month: 'May', amount: 1900 },
-            { month: 'Jun', amount: 2500 },
-            { month: 'Jul', amount: 2800 }
-          ]
-        },
-        bookings: {
-          total: 156,
-          completed: 142,
-          pending: 8,
-          cancelled: 6
-        },
-        stations: {
-          total: 5,
-          active: 4,
-          inactive: 1
-        },
-        ratings: {
-          average: 4.2,
-          count: 89
-        }
-      };
+      // Fetch owner data
+      const owner = await authService.getUserById('68c294e112902e685584814c');
       
-      setAnalytics(mockData);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching analytics:", err);
-      setError("Failed to fetch analytics data.");
-      toast.error("Failed to load analytics");
+      // Fetch history
+      const historyData = await historyService.getOwnerHistory();
+      
+      // Fetch station details
+      const stationDetails = {};
+      const allComments = [];
+      
+      for (const stationId of owner.ownedStations) {
+        const station = await stationService.getStationById(stationId);
+        stationDetails[stationId] = station;
+        
+        const comments = await commentService.getComments(stationId);
+        allComments.push(...comments);
+      }
+      
+      setAnalyticsData({
+        owner,
+        history: historyData.history,
+        stations: Object.values(stationDetails),
+        comments: allComments,
+        stationDetails
+      });
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (user?._id) {
-      fetchAnalytics();
-    }
-  }, [user, timeRange]);
+  // Calculate metrics
+  const metrics = useMemo(() => {
+    if (!analyticsData.history) return {};
 
-  const getRevenueChartUrl = () => {
-    const data = analytics.revenue.monthly;
-    const labels = data.map(d => d.month);
-    const values = data.map(d => d.amount);
+    const now = new Date();
+    const timeFilter = (date) => {
+      const d = new Date(date);
+      if (timeRange === 'weekly') {
+        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+        return d >= weekAgo;
+      } else if (timeRange === 'monthly') {
+        const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+        return d >= monthAgo;
+      } else {
+        const yearAgo = new Date(now - 365 * 24 * 60 * 60 * 1000);
+        return d >= yearAgo;
+      }
+    };
+
+    const filteredHistory = analyticsData.history.filter(h => 
+      timeFilter(h.createdAt) && 
+      (selectedStation === 'all' || h.stationId._id === selectedStation)
+    );
+
+    const totalBookings = filteredHistory.length;
+    const acceptedBookings = filteredHistory.filter(h => h.status === 'accepted').length;
+    const rejectedBookings = filteredHistory.filter(h => h.status === 'rejected').length;
+    const pendingBookings = filteredHistory.filter(h => h.status === 'pending').length;
     
-    return `https://quickchart.io/chart?c={
-      type:'line',
-      data:{
-        labels:${JSON.stringify(labels)},
-        datasets:[{
-          label:'Revenue (₹)',
-          data:${JSON.stringify(values)},
-          borderColor:'rgb(34, 197, 94)',
-          backgroundColor:'rgba(34, 197, 94, 0.1)',
-          tension:0.4
-        }]
-      },
-      options:{
-        responsive:true,
-        plugins:{
-          title:{
-            display:true,
-            text:'Revenue Trend'
-          }
-        },
-        scales:{
-          y:{
-            beginAtZero:true
-          }
-        }
-      }
-    }`;
-  };
+    const acceptanceRate = totalBookings > 0 ? (acceptedBookings / totalBookings * 100).toFixed(1) : 0;
+    
+    const avgDuration = filteredHistory.reduce((acc, h) => {
+      const duration = (new Date(h.endTime) - new Date(h.startTime)) / (1000 * 60 * 60);
+      return acc + duration;
+    }, 0) / (filteredHistory.length || 1);
 
-  const getBookingsChartUrl = () => {
-    const data = analytics.bookings;
-    return `https://quickchart.io/chart?c={
-      type:'doughnut',
-      data:{
-        labels:['Completed','Pending','Cancelled'],
-        datasets:[{
-          data:[${data.completed},${data.pending},${data.cancelled}],
-          backgroundColor:['rgb(34, 197, 94)','rgb(251, 191, 36)','rgb(239, 68, 68)']
-        }]
-      },
-      options:{
-        responsive:true,
-        plugins:{
-          title:{
-            display:true,
-            text:'Booking Status'
-          }
-        }
+    const avgRating = analyticsData.comments.length > 0
+      ? (analyticsData.comments.reduce((acc, c) => acc + c.rating, 0) / analyticsData.comments.length).toFixed(1)
+      : 0;
+
+    const revenue = acceptedBookings * 150; // Assuming ₹150 per booking
+
+    return {
+      totalBookings,
+      acceptedBookings,
+      rejectedBookings,
+      pendingBookings,
+      acceptanceRate,
+      avgDuration: avgDuration.toFixed(1),
+      avgRating,
+      revenue,
+      totalStations: analyticsData.stations.length,
+      totalPorts: analyticsData.stations.reduce((acc, s) => acc + s.totalPorts, 0),
+      uniqueUsers: new Set(filteredHistory.map(h => h.userId._id)).size
+    };
+  }, [analyticsData, timeRange, selectedStation]);
+
+  // Prepare chart data
+  const chartData = useMemo(() => {
+    if (!analyticsData.history) return {};
+
+    // Time series data
+    const timeSeriesData = {};
+    analyticsData.history.forEach(h => {
+      const date = new Date(h.createdAt);
+      const key = timeRange === 'weekly' 
+        ? date.toLocaleDateString('en', { weekday: 'short' })
+        : timeRange === 'monthly'
+        ? date.toLocaleDateString('en', { day: 'numeric', month: 'short' })
+        : date.toLocaleDateString('en', { month: 'short', year: '2-digit' });
+      
+      if (!timeSeriesData[key]) {
+        timeSeriesData[key] = { date: key, bookings: 0, revenue: 0 };
       }
-    }`;
-  };
+      timeSeriesData[key].bookings++;
+      if (h.status === 'accepted') {
+        timeSeriesData[key].revenue += 150;
+      }
+    });
+
+    // Station performance
+    const stationPerformance = analyticsData.stations.map(station => {
+      const stationBookings = analyticsData.history.filter(h => h.stationId._id === station._id);
+      const stationComments = analyticsData.comments.filter(c => c.stationId === station._id);
+      const avgRating = stationComments.length > 0
+        ? stationComments.reduce((acc, c) => acc + c.rating, 0) / stationComments.length
+        : 0;
+      
+      return {
+        name: station.name,
+        bookings: stationBookings.length,
+        rating: avgRating.toFixed(1),
+        utilization: ((stationBookings.length / (station.totalPorts * 30)) * 100).toFixed(1)
+      };
+    });
+
+    // Port utilization
+    const portUtilization = [];
+    for (let i = 1; i <= 5; i++) {
+      const portBookings = analyticsData.history.filter(h => h.portId === i);
+      portUtilization.push({
+        port: `Port ${i}`,
+        bookings: portBookings.length,
+        utilization: ((portBookings.length / 30) * 100).toFixed(1)
+      });
+    }
+
+    // Status distribution
+    const statusDistribution = [
+      { name: 'Accepted', value: metrics.acceptedBookings, color: '#10b981' },
+      { name: 'Rejected', value: metrics.rejectedBookings, color: '#ef4444' },
+      { name: 'Pending', value: metrics.pendingBookings, color: '#f59e0b' }
+    ];
+
+    // Peak hours
+    const peakHours = {};
+    analyticsData.history.forEach(h => {
+      const hour = new Date(h.startTime).getHours();
+      if (!peakHours[hour]) peakHours[hour] = 0;
+      peakHours[hour]++;
+    });
+    const peakHoursData = Object.entries(peakHours).map(([hour, count]) => ({
+      hour: `${hour}:00`,
+      bookings: count
+    })).sort((a, b) => parseInt(a.hour) - parseInt(b.hour));
+
+    return {
+      timeSeries: Object.values(timeSeriesData),
+      stationPerformance,
+      portUtilization,
+      statusDistribution,
+      peakHours: peakHoursData
+    };
+  }, [analyticsData, timeRange, metrics]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading analytics..." />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
+          <p className="text-gray-300 text-lg">Loading analytics...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
-          <p className="text-gray-600">Track your station performance and revenue</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 bg-gray-800/50 backdrop-blur-lg rounded-2xl p-6 border border-gray-700">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
+              <p className="text-gray-400">Monitor your EV charging stations performance</p>
+            </div>
+            
+            <div className="flex flex-wrap gap-3">
+              {/* Time Range Selector */}
+              <select 
+                value={timeRange} 
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="bg-blue-600 text-black px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="weekly">Last 7 Days</option>
+                <option value="monthly">Last 30 Days</option>
+                <option value="yearly">Last Year</option>
+              </select>
+              
+              {/* Station Filter */}
+              <select 
+                value={selectedStation} 
+                onChange={(e) => setSelectedStation(e.target.value)}
+                className="bg-gray-700 text-black px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="all">All Stations</option>
+                {analyticsData.stations.map(station => (
+                  <option key={station._id} value={station._id}>{station.name}</option>
+                ))}
+              </select>
+              
+              <button 
+                onClick={fetchAnalyticsData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-            <option value="1y">Last year</option>
-          </select>
-          <button
-            onClick={fetchAnalytics}
-            className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
-          >
-            Refresh
-          </button>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-blue-600/20 to-blue-700/20 backdrop-blur-lg rounded-xl p-6 border border-blue-500/30">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-blue-500/20 p-3 rounded-lg">
+                <Activity className="w-6 h-6 text-blue-400" />
+              </div>
+              <span className="text-xs text-blue-400 font-semibold">+12%</span>
+            </div>
+            <h3 className="text-gray-400 text-sm mb-1">Total Bookings</h3>
+            <p className="text-2xl font-bold text-white">{metrics.totalBookings}</p>
+            <p className="text-xs text-gray-500 mt-2">Acceptance Rate: {metrics.acceptanceRate}%</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-600/20 to-green-700/20 backdrop-blur-lg rounded-xl p-6 border border-green-500/30">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-green-500/20 p-3 rounded-lg">
+                <DollarSign className="w-6 h-6 text-green-400" />
+              </div>
+              <span className="text-xs text-green-400 font-semibold">+8%</span>
+            </div>
+            <h3 className="text-gray-400 text-sm mb-1">Revenue</h3>
+            <p className="text-2xl font-bold text-white">₹{metrics.revenue?.toLocaleString()}</p>
+            <p className="text-xs text-gray-500 mt-2">From {metrics.acceptedBookings} bookings</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-600/20 to-purple-700/20 backdrop-blur-lg rounded-xl p-6 border border-purple-500/30">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-purple-500/20 p-3 rounded-lg">
+                <Users className="w-6 h-6 text-purple-400" />
+              </div>
+              <span className="text-xs text-purple-400 font-semibold">+15%</span>
+            </div>
+            <h3 className="text-gray-400 text-sm mb-1">Unique Users</h3>
+            <p className="text-2xl font-bold text-white">{metrics.uniqueUsers}</p>
+            <p className="text-xs text-gray-500 mt-2">Active customers</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-amber-600/20 to-amber-700/20 backdrop-blur-lg rounded-xl p-6 border border-amber-500/30">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-amber-500/20 p-3 rounded-lg">
+                <Star className="w-6 h-6 text-amber-400" />
+              </div>
+              <span className="text-xs text-amber-400 font-semibold">+0.3</span>
+            </div>
+            <h3 className="text-gray-400 text-sm mb-1">Average Rating</h3>
+            <p className="text-2xl font-bold text-white">{metrics.avgRating}/5.0</p>
+            <p className="text-xs text-gray-500 mt-2">From {analyticsData.comments.length} reviews</p>
+          </div>
+        </div>
+
+        {/* Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Booking Trends */}
+          <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <TrendingUp className="w-5 h-5 mr-2 text-blue-400" />
+              Booking Trends
+            </h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={chartData.timeSeries}>
+                <defs>
+                  <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="date" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
+                  labelStyle={{ color: '#9ca3af' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="bookings" 
+                  stroke="#3b82f6" 
+                  fillOpacity={1} 
+                  fill="url(#colorBookings)" 
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Revenue Trends */}
+          <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <DollarSign className="w-5 h-5 mr-2 text-green-400" />
+              Revenue Analysis
+            </h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={chartData.timeSeries}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="date" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
+                  labelStyle={{ color: '#9ca3af' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="#10b981" 
+                  strokeWidth={2}
+                  dot={{ fill: '#10b981', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Station Performance */}
+          <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <Battery className="w-5 h-5 mr-2 text-purple-400" />
+              Station Performance
+            </h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={chartData.stationPerformance}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="name" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
+                  labelStyle={{ color: '#9ca3af' }}
+                />
+                <Bar dataKey="bookings" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="utilization" fill="#ec4899" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Booking Status Distribution */}
+          <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-amber-400" />
+              Booking Status Distribution
+            </h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={chartData.statusDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.statusDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Additional Analytics */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Port Utilization */}
+          <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <Battery className="w-5 h-5 mr-2 text-cyan-400" />
+              Port Utilization
+            </h3>
+            <div className="space-y-3">
+              {chartData.portUtilization?.map((port, index) => (
+                <div key={index}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-400">{port.port}</span>
+                    <span className="text-white font-semibold">{port.utilization}%</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${port.utilization}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Peak Hours */}
+          <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-rose-400" />
+              Peak Hours Analysis
+            </h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartData.peakHours?.slice(0, 8)}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="hour" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
+                />
+                <Bar dataKey="bookings" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <MapPin className="w-5 h-5 mr-2 text-emerald-400" />
+              Infrastructure Overview
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                <span className="text-gray-400">Total Stations</span>
+                <span className="text-xl font-bold text-white">{metrics.totalStations}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                <span className="text-gray-400">Total Ports</span>
+                <span className="text-xl font-bold text-white">{metrics.totalPorts}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                <span className="text-gray-400">Avg Session</span>
+                <span className="text-xl font-bold text-white">{metrics.avgDuration} hrs</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                <span className="text-gray-400">Success Rate</span>
+                <span className="text-xl font-bold text-green-400">{metrics.acceptanceRate}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Comments */}
+        <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+            <Star className="w-5 h-5 mr-2 text-amber-400" />
+            Recent Customer Reviews
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {analyticsData.comments.slice(0, 6).map((comment, index) => (
+              <div key={index} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-white">{comment.userId.name}</span>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < comment.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} 
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-gray-400 text-sm mb-2">{comment.text}</p>
+                <p className="text-xs text-gray-500">
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <Card className="border-red-200 bg-red-50">
-          <div className="flex items-center space-x-2">
-            <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-red-700">{error}</span>
-            <button 
-              onClick={fetchAnalytics}
-              className="ml-auto px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-            >
-              Retry
-            </button>
-          </div>
-        </Card>
-      )}
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-          </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
-            ₹{analytics.revenue.total.toLocaleString()}
-          </div>
-          <div className="text-sm text-gray-600">Total Revenue</div>
-        </Card>
-
-        <Card className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
-            {analytics.bookings.total}
-          </div>
-          <div className="text-sm text-gray-600">Total Bookings</div>
-        </Card>
-
-        <Card className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
-            {analytics.stations.active}
-          </div>
-          <div className="text-sm text-gray-600">Active Stations</div>
-        </Card>
-
-        <Card className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-          </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
-            {analytics.ratings.average}
-          </div>
-          <div className="text-sm text-gray-600">Avg Rating</div>
-        </Card>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
-            <img 
-              src={getRevenueChartUrl()} 
-              alt="Revenue Chart" 
-              className="w-full h-64 object-contain"
-            />
-          </div>
-        </Card>
-
-        <Card>
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Status</h3>
-            <img 
-              src={getBookingsChartUrl()} 
-              alt="Bookings Chart" 
-              className="w-full h-64 object-contain"
-            />
-          </div>
-        </Card>
-      </div>
-
-      {/* Detailed Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Station Performance</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Total Stations</span>
-                <span className="font-semibold">{analytics.stations.total}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Active Stations</span>
-                <span className="font-semibold text-green-600">{analytics.stations.active}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Inactive Stations</span>
-                <span className="font-semibold text-red-600">{analytics.stations.inactive}</span>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Breakdown</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Completed</span>
-                <span className="font-semibold text-green-600">{analytics.bookings.completed}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Pending</span>
-                <span className="font-semibold text-yellow-600">{analytics.bookings.pending}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Cancelled</span>
-                <span className="font-semibold text-red-600">{analytics.bookings.cancelled}</span>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Debug Info (Development Only) */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="bg-yellow-50 border-yellow-200">
-          <div className="p-4">
-            <h4 className="font-semibold text-yellow-800 mb-2">Debug Info</h4>
-            <div className="text-sm text-yellow-700">
-              <p>User ID: {user?._id}</p>
-              <p>Time Range: {timeRange}</p>
-              <p>Data Source: Mock (replace with real API)</p>
-            </div>
-          </div>
-        </Card>
-      )}
     </div>
   );
 };

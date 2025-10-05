@@ -44,6 +44,11 @@ router.get(
   availabilityController.getPendingRequests
 );
 
+router.post("/clear-notifications", authMiddleware,availabilityController.clearUserNotifications);
+
+
+router.post('/:stationId/clear-notifications', authMiddleware, availabilityController.clearStationNotifications);
+
 // Clear expired bookings
 router.delete("/:stationId/clear", availabilityController.clearExpiredBookings);
 

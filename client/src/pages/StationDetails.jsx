@@ -86,7 +86,8 @@ const StationDetails = () => {
       try {
         // Using OpenRouteService API (free tier) for routing
         const response = await fetch(
-          `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf624846c4d9b74b8742409b4b3b7b8b4e8e46&start=${userLocation.longitude},${userLocation.latitude}&end=${station.location.longitude},${station.location.latitude}`
+          `https://api.openrouteservice.org/v2/directions/driving-car?api_key=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImQxYzgyYmM4NjM2ZjQ5NTlhNzJhZWUxMmFkZjJjNDc4IiwiaCI6Im11cm11cjY0In0=&start=${userLocation.longitude},${userLocation.latitude}&end=${station.location.longitude},${station.location.latitude}`
+          // `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf624846c4d9b74b8742409b4b3b7b8b4e8e46&start=${userLocation.longitude},${userLocation.latitude}&end=${station.location.longitude},${station.location.latitude}`
         );
 
         if (response.ok) {

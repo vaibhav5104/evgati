@@ -38,8 +38,15 @@ export const stationService = {
   },
 
   // Find nearest stations
-  findNearestStations: async (latitude, longitude) => {
-    const response = await api.get(`/api/stations/nearest/search?lat=${latitude}&lng=${longitude}`);
-    return response.data;
-  }
+  findNearestStation: async (latitude, longitude) => {
+    try {
+      // Corrected: Changed query parameters from 'lat' and 'lng' to 'latitude' and 'longitude'
+      // to match what the backend controller expects.
+      const response = await api.get(`/api/stations/nearest/search?latitude=${latitude}&longitude=${longitude}`);
+      return response.data;
+    } catch (error) {
+      console.error('Find nearest station error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
 };

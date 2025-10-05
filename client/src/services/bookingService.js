@@ -148,5 +148,53 @@ getUserBookings: async () => {
       console.error('Cancel booking error:', error.response?.data || error.message);
       throw error;
     }
-  }
+  },
+
+  // clearUserNotifications: async () => {
+  //   // API endpoint to mark all user notifications as read
+  //   const response = await fetch(`/api/availability/clear-notifications`, {
+  //     method: 'POST',
+  //     headers: { 
+  //       'Authorization': `Bearer ${token}`,
+  //       'Content-Type': 'application/json'
+  //     }
+  //   });
+  //   return response.json();
+  // },
+
+  // clearStationNotifications: async (stationId) => {
+  //   // API endpoint to clear notifications for a specific station
+  //   const response = await fetch(`/api/availability/${stationId}/clear-notifications`, {
+  //     method: 'POST',
+  //     headers: { 
+  //       'Authorization': `Bearer ${token}`,
+  //       'Content-Type': 'application/json'
+  //     }
+  //   });
+  //   return response.json();
+  // }
+  clearUserNotifications: async () => {
+    try {
+      const response = await api.post('/api/availability/clear-notifications');
+      return response.data;
+    } catch (error) {
+      console.error('Clear user notifications error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Clears all pending booking notifications for a specific station.
+   * @param {string} stationId - The ID of the station to clear notifications for.
+   * @returns {Promise<object>} The server's response.
+   */
+  clearStationNotifications: async (stationId) => {
+    try {
+      const response = await api.post(`/api/availability/${stationId}/clear-notifications`);
+      return response.data;
+    } catch (error) {
+      console.error('Clear station notifications error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
 };

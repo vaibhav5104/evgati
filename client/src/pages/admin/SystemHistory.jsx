@@ -13,6 +13,7 @@ const SystemHistory = () => {
         const data = await historyService.getAdminHistory();
         setLogs(data);
         setError(null);
+        console.log(logs)
       } catch (err) {
         setError("Failed to fetch system history.");
       }

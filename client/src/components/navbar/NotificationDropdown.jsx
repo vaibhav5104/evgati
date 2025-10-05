@@ -58,25 +58,50 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       [section]: !prev[section]
     }));
   };
-  const handleMarkAllRead = () => {
-    {user?.role === 'user' && 
-      setUserNotifications({
-        approvedRequestsLength: 0,
-        rejectedRequestsLength: 0
-      })
-    ;}
-    {user?.role === 'owner' && 
-      setOwnerNotifications({
-      total : 0
-      });
-    ;}
-    {user?.role === 'owner' && 
-      setAdminNotifications({
-        pendingStationRequestsLength: 0,
-        pendingUserRequestsLength: 0,
-        totalPendingActionsLength: 0
-      });
-    ;}
+  const handleMarkAllRead = async () => {
+    try {
+      switch (user?.role) {
+        case 'user':
+          // Clear user notifications
+          await bookingService.clearUserNotifications(); // Implement this method in bookingService
+          setUserNotifications({
+            userRequestsLength: 0,
+            approvedRequestsLength: 0,
+            rejectedRequestsLength: 0,
+            pendingRequestsLength: 0,
+            requests: []
+          });
+          break;
+
+        case 'owner':
+          // Clear owner notifications for both bookings and stations
+          const stationIds = user.ownedStations;
+          await Promise.all(stationIds.map(stationId => 
+            bookingService.clearStationNotifications(stationId)
+          ));
+          
+          setOwnerNotifications({
+            total: 0,
+            pending: [],
+            pendingBookingsCount: 0,
+            pendingStationsCount: 0
+          });
+          break;
+
+        case 'admin':
+          // Clear admin notifications
+          await adminService.clearPendingStationNotifications();
+          setAdminNotifications({
+            pendingStationRequestsLength: 0,
+            totalPendingActionsLength: 0,
+            pendingStations: []
+          });
+          break;
+      }
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+      // Optionally show error toast
+    }
   };
   
   const handleNotificationClick = (path) => {

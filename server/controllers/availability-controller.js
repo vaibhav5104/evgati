@@ -358,4 +358,107 @@ const clearExpiredBookings = async (req, res) => {
     }
 };
 
-module.exports = { bookPort, getAvailability, clearExpiredBookings, approveBookingRequest, rejectBookingRequest, getPendingRequests, getUserRequests };
+// Clear all user notifications (booking requests)
+const clearUserNotifications = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Find all availabilities where this user has bookings
+    const availabilities = await Availability.find({ "bookings.userId": userId });
+
+    // Track modified availabilities
+    const modifiedAvailabilities = [];
+
+    // Iterate through availabilities and clear user's pending notifications
+    for (const availability of availabilities) {
+      // Remove pending notifications for this user
+      availability.bookings = availability.bookings.filter(
+        booking => 
+          String(booking.userId) !== String(userId) || 
+          booking.status !== "pending"
+      );
+
+      // Save the modified availability
+      await availability.save();
+      modifiedAvailabilities.push(availability);
+    }
+
+    res.json({
+      message: "User notifications cleared successfully",
+      modifiedAvailabilities: modifiedAvailabilities.length
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: "Error clearing user notifications", 
+      error: error.message 
+    });
+  }
+};
+
+// Clear notifications for a specific station
+const clearStationNotifications = async (req, res) => {
+  try {
+    const { stationId } = req.params;
+    const userId = req.user._id;
+
+    // Find the specific station
+    const station = await Station.findById(stationId);
+    if (!station) {
+      return res.status(404).json({ message: "Station not found" });
+    }
+
+    // Verify user is the owner of the station
+    if (
+      station.owner.toString() !== userId.toString() && 
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ 
+        message: "Only station owner or admin can clear station notifications" 
+      });
+    }
+
+    // Find availability for this station
+    const availability = await Availability.findOne({ stationId });
+    if (!availability) {
+      return res.status(404).json({ message: "No availability info found" });
+    }
+
+    // Clear pending bookings for this station
+    availability.bookings = availability.bookings.filter(
+      booking => booking.status !== "pending"
+    );
+
+    // Update station ports
+    station.ports.forEach(port => {
+      port.bookings = port.bookings.filter(
+        booking => booking.status !== "pending"
+      );
+    });
+
+    // Save changes
+    await availability.save();
+    await station.save();
+
+    res.json({
+      message: "Station notifications cleared successfully",
+      clearedBookingsCount: availability.bookings.length
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: "Error clearing station notifications", 
+      error: error.message 
+    });
+  }
+};
+
+module.exports = { 
+  bookPort, 
+  getAvailability, 
+  clearExpiredBookings, 
+  approveBookingRequest, 
+  rejectBookingRequest, 
+  getPendingRequests, 
+  getUserRequests,
+  clearUserNotifications,  // Add new controllers
+  clearStationNotifications 
+};
