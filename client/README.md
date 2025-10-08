@@ -26,7 +26,6 @@ src/
 │   ├── station/        # Station-related components
 │   ├── admin/          # Admin panel components
 │   ├── owner/          # Owner dashboard components
-│   ├── chat/           # Chat components
 │   ├── comment/        # Comment system components
 │   └── ui/             # Base UI components
 ├── pages/              # Page components

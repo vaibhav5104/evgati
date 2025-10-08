@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { stationService } from "../services/stationService";
 import { BookingForm } from "../components/booking";
 import { CommentForm, CommentList } from "../components/comment";
-import { ChatWindow } from "../components/chat";
 import StationMap from "../components/station/StationMap";
 import { useAuth } from "../hooks/useAuth";
 import Button from "../components/ui/Button";
@@ -156,7 +155,6 @@ const StationDetails = () => {
     { id: "location", label: "Location & Map", icon: "📍" },
     { id: "booking", label: "Book", icon: "📅" },
     { id: "comments", label: "Reviews", icon: "⭐" },
-    { id: "chat", label: "Chat", icon: "💬" }
   ];
 
   if (loading) {
@@ -463,20 +461,8 @@ const StationDetails = () => {
               </div>
             )}
 
-            {activeTab === "chat" && user && (
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                  <span className="mr-2">💬</span>
-                  Chat with Station Owner
-                </h3>
-                <div className="border rounded-lg">
-                  <ChatWindow stationId={id} userId={user._id} />
-                </div>
-              </div>
-            )}
-
             {/* Show login message for non-authenticated users */}
-            {!user && (activeTab === "booking" || activeTab === "chat") && (
+            {!user && (activeTab === "booking" ) && (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">🔒</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Login Required</h3>
