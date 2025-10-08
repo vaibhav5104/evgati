@@ -22,6 +22,7 @@ const authMiddleware = async (req, res, next) => {
     req.user = userData;
     req.token = jwtToken;
     req.userID = userData._id;
+    // console.log(req.user);
 
     next();
   } catch (error) {

@@ -1,7 +1,9 @@
 const Availability = require("../models/availability-model");
 const Station = require("../models/station-model");
-const History = require("../models/history-model"); // adjust path as needed
+const History = require("../models/history-model"); // optional, for archiving
 const mongoose = require("mongoose");
+const { addNotification } = require("./notification-controller"); 
+const User = require("../models/user-model");
 
 const bookPort = async (req, res) => {
   try {
@@ -15,7 +17,6 @@ const bookPort = async (req, res) => {
     const station = await Station.findById(stationId);
     if (!station) return res.status(404).json({ message: "Station not found" });
 
-    // ensure port exists
     const portIndex = station.ports.findIndex(
       (p) => p.portNumber.toString() === portId.toString()
     );
@@ -39,14 +40,13 @@ const bookPort = async (req, res) => {
       return res.status(400).json({ message: "Start time must be in the future" });
     }
 
-    // 🔹 Check for conflicts only on the SAME port
     const hasConflict = availability.bookings.some((booking) => {
       return (
         booking.portId.toString() === portId.toString() &&
         (
-          (start >= booking.startTime && start < booking.endTime) || // start overlaps
-          (end > booking.startTime && end <= booking.endTime) ||     // end overlaps
-          (start <= booking.startTime && end >= booking.endTime)     // wraps around
+          (start >= booking.startTime && start < booking.endTime) || 
+          (end > booking.startTime && end <= booking.endTime) ||     
+          (start <= booking.startTime && end >= booking.endTime)
         )
       );
     });
@@ -57,11 +57,10 @@ const bookPort = async (req, res) => {
       });
     }
 
-    // 🔑 Create a single ObjectId for both Availability + Station
     const bookingId = new mongoose.Types.ObjectId();
 
     const bookingRequest = {
-      _id: bookingId,  // force same id
+      _id: bookingId,
       portId,
       startTime: start,
       endTime: end,
@@ -75,7 +74,19 @@ const bookPort = async (req, res) => {
     await availability.save();
     await station.save();
 
-    res.json({ message: "Booking request sent to station owner", bookingRequest });
+    if (station.owner) {
+      await addNotification(
+        station.owner,
+        "booking",
+        "New Booking Request",
+        `A user has requested to book Port ${portId} at your station "${station.name}".`,
+        bookingId,
+        "Booking",
+        station._id
+      );
+    }
+
+    res.json({ message: `Booking request sent to ${station.owner} with having station : ${station._id} and bookingId : ${bookingId}`, bookingRequest });
   } catch (error) {
     res.status(500).json({ message: "Error requesting booking", error: error.message });
   }
@@ -97,18 +108,18 @@ const approveBookingRequest = async (req, res) => {
     const availability = await Availability.findOne({ stationId });
     if (!availability) return res.status(404).json({ message: "Availability not found" });
 
-    // find booking in Availability
     const booking = availability.bookings.id(bookingId);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    if(booking.status === "accepted" ) return res.status(409).json({ message: "This booking has been already accepted" });
-    if(booking.status === "rejected") return res.status(409).json({ message: "This booking has been already rejected" });
-    // ✅ Approve booking
+    if (booking.status === "accepted")
+      return res.status(409).json({ message: "This booking has already been accepted" });
+    if (booking.status === "rejected")
+      return res.status(409).json({ message: "This booking has already been rejected" });
+
     booking.status = "accepted";
     booking.ownerMessage = ownerMessage || "";
 
-    // directly update the port in station
-    const port = station.ports.find(p => p.portNumber === booking.portId);
+    const port = station.ports.find((p) => p.portNumber === booking.portId);
     if (port) {
       const portBooking = port.bookings.id(bookingId);
       if (portBooking) {
@@ -119,6 +130,34 @@ const approveBookingRequest = async (req, res) => {
 
     await availability.save();
     await station.save();
+
+    // ✅ Mark owner's booking request notification as read
+    const owner = await User.findById(station.owner);
+    if (owner) {
+      // console.log("owner: " , owner)
+      const notification = owner.notifications.find(
+        (n) =>
+          n.type === "booking" &&
+          String(n.relatedId) === String(bookingId) &&
+          n.message.includes("requested")
+      );
+      if (notification) {
+        notification.isRead = true;
+        await owner.save();
+      }
+    }else{
+      // console.log("owner: " , owner)
+    }
+
+    // ✅ Notify user about approval
+    await addNotification(
+      booking.userId,
+      "booking",
+      "Booking Approved",
+      `Your booking for port ${booking.portId} at station "${station.name}" has been approved.`,
+      bookingId,
+      "Booking"
+    );
 
     res.json({ message: "Booking approved", booking });
   } catch (error) {
@@ -142,18 +181,16 @@ const rejectBookingRequest = async (req, res) => {
     const availability = await Availability.findOne({ stationId });
     if (!availability) return res.status(404).json({ message: "Availability not found" });
 
-    // find booking in Availability
     const booking = availability.bookings.id(bookingId);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    if(booking.status === "accepted" || booking.status === "rejected") return res.status(400).json({ message: "Only Pending bookings can be approved" });
+    if (booking.status === "accepted" || booking.status === "rejected")
+      return res.status(400).json({ message: "Only pending bookings can be rejected" });
 
-    // ❌ Reject booking
     booking.status = "rejected";
     booking.ownerMessage = ownerMessage || "Booking rejected by owner";
 
-    // directly update the port in station
-    const port = station.ports.find(p => p.portNumber === booking.portId);
+    const port = station.ports.find((p) => p.portNumber === booking.portId);
     if (port) {
       const portBooking = port.bookings.id(bookingId);
       if (portBooking) {
@@ -164,6 +201,31 @@ const rejectBookingRequest = async (req, res) => {
 
     await availability.save();
     await station.save();
+
+    // ✅ Mark owner's booking request notification as read
+    const owner = await User.findById(station.owner);
+    if (owner) {
+      const notification = owner.notifications.find(
+        (n) =>
+          n.type === "booking" &&
+          String(n.relatedId) === String(bookingId) &&
+          n.message.includes("requested")
+      );
+      if (notification) {
+        notification.isRead = true;
+        await owner.save();
+      }
+    }
+
+    // ✅ Notify user about rejection
+    await addNotification(
+      booking.userId,
+      "booking",
+      "Booking Rejected",
+      `Your booking for port ${booking.portId} at station "${station.name}" was rejected by the owner.`,
+      bookingId,
+      "Booking"
+    );
 
     res.json({ message: "Booking rejected", booking });
   } catch (error) {
@@ -325,6 +387,45 @@ const getUserRequests = async (req, res) => {
   }
 };
 
+
+const isPending = async (req, res) => {
+  try {
+    const { stationId, bookingId } = req.params;
+
+    // 1️⃣ Validate input
+    if (!stationId || !bookingId) {
+      return res.status(400).json({ message: "Station ID and Booking ID are required" });
+    }
+
+    // 2️⃣ Find the availability record for this station
+    const availability = await Availability.findOne({ stationId });
+    if (!availability) {
+      return res.status(404).json({ message: "Availability not found for this station" });
+    }
+
+    // 3️⃣ Find the specific booking within the availability
+    const booking = availability.bookings.id(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // 4️⃣ Check booking status
+    const isPending = booking.status === "pending";
+
+    // 5️⃣ Respond
+    res.json({
+      bookingId,
+      stationId,
+      status: booking.status,
+      isPending,
+    });
+  } catch (error) {
+    console.error("Error checking booking status:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
 // Clear past bookings (cron job or manual call)
 const clearExpiredBookings = async (req, res) => {
     try {
@@ -459,6 +560,7 @@ module.exports = {
   rejectBookingRequest, 
   getPendingRequests, 
   getUserRequests,
+  isPending,
   clearUserNotifications,  // Add new controllers
   clearStationNotifications 
 };

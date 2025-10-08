@@ -16,7 +16,8 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { register, loginWithGoogle } = useAuth();
+  const API = import.meta.env.VITE_API_URL;
+  const { storeTokenInLS,loginWithGoogle } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,16 +30,33 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      await register(formData);
-      toast.success("Registration successful!");
-      navigate("/dashboard");
+      e.preventDefault();
+      const response = await fetch(`${API}/api/auth/register`, {
+          method: "POST",
+          headers: {
+              'Content-Type': "application/json"
+          },
+          body: JSON.stringify(formData)
+      });
+      const res_data = await response.json();
+
+      if (response.ok) {
+          storeTokenInLS(res_data.token);
+          setFormData({ name: "", email: "",password: "" });
+          // setFormData({ username: "", email: "", phone: "", password: "" });
+          toast.success("Registration successful");
+          navigate("/");
+      } else {
+          toast.error(res_data.extraDetails ? res_data.extraDetails : res_data.message);
+      }
     } catch (error) {
-      toast.error(error.message || "Registration failed");
+        console.log(error);
     } finally {
       setIsLoading(false);
     }
+      
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {

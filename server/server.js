@@ -13,6 +13,7 @@ const authRouter = require("./routers/auth-router");
 const adminRouter = require("./routers/admin-router")
 const historyRouter = require("./routers/history-router")
 const { saveMessage } = require("./controllers/chat-controller");
+const notificationRoutes = require("./routers/notification-router");
 
 require("dotenv").config();
 
@@ -52,6 +53,7 @@ app.use("/api/history", historyRouter);
 app.use("/api/comments", commentRouter);
 app.use("/api/availability", availabilityRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/notifications", notificationRoutes);
 
 // ---- Socket.IO Auth Middleware ----
 io.use((socket, next) => {

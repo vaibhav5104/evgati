@@ -2,7 +2,7 @@ const Station = require("../models/station-model");
 const User = require("../models/user-model");
 const Availability = require("../models/availability-model");
 const availabilityController = require("../controllers/availability-controller")
-
+const {addNotification} = require("../controllers/notification-controller");
 // Create a new station (goes to pending)
 const createStation = async (req, res) => {
   try {
@@ -24,6 +24,8 @@ const createStation = async (req, res) => {
     const station = new Station({ ...req.body, owner: userId, status: "pending" });
     await station.save();
 
+    console.log(req.user);
+
     // create availability for this station
     await Availability.create({
       stationId: station._id,
@@ -36,6 +38,19 @@ const createStation = async (req, res) => {
     await User.findByIdAndUpdate(userId, {
       $addToSet: { stationRequests: station._id } // addToSet prevents duplicates
     });
+
+    // ✅ Notify admin about new pending station
+    const admin = await User.findOne({ role: "admin" });
+    if (admin) {
+      await addNotification(
+        admin._id,
+        "station",
+        "New Station Request",
+        `${req.user.name} submitted a new station "${station.name}" for approval.`,
+        station._id,
+        "Station"
+      );
+    }
 
     res.status(201).json({ message: "Station submitted for review", station });
   } catch (error) {

@@ -11,7 +11,7 @@ const bookingSchema = new mongoose.Schema({
     enum: ["pending", "accepted", "rejected", "active", "completed", "cancelled"],
     default: "pending"
   },
-  ownerMessage: { type: String }
+  ownerMessage: { type: String ,required : false}
 });
 
 

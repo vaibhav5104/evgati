@@ -44,6 +44,8 @@ router.get(
   availabilityController.getPendingRequests
 );
 
+router.get("/:stationId/bookings/:bookingId/status", authMiddleware, availabilityController.isPending);
+
 router.post("/clear-notifications", authMiddleware,availabilityController.clearUserNotifications);
 
 

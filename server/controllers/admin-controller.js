@@ -1,5 +1,6 @@
 const Station = require("../models/station-model");
 const User = require("../models/user-model");
+const { addNotification } = require("./notification-controller");
 
 // Get all pending stations
 const getPendingStations = async (req, res) => {
@@ -35,6 +36,16 @@ const approveStation = async (req, res) => {
         user.role = "owner";
       }
       await user.save();
+
+      // ✅ Notify owner about approval
+      await addNotification(
+        user._id,
+        "station",
+        "Station Approved",
+        `Your station "${station.name}" has been approved by the admin.`,
+        station._id,
+        "Station"
+      );
     }
 
     res.json({ message: "Station approved", station });
@@ -42,7 +53,6 @@ const approveStation = async (req, res) => {
     res.status(500).json({ message: "Error approving station", error: error.message });
   }
 };
-
 
 // Reject a station
 const rejectStation = async (req, res) => {
@@ -66,6 +76,16 @@ const rejectStation = async (req, res) => {
         (reqId) => reqId.toString() !== id
       );
       await user.save();
+
+      // ✅ Notify owner about rejection
+      await addNotification(
+        user._id,
+        "station",
+        "Station Rejected",
+        `Your station "${station.name}" was rejected by the admin.`,
+        station._id,
+        "Station"
+      );
     }
 
     // Delete station
