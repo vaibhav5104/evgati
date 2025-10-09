@@ -1,0 +1,75 @@
+name: Dependabot Auto-Merge (Simple + Safe)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+# Add permissions so github-script and merge actions can write
+permissions:
+  contents: write          # needed for merging PRs
+  pull-requests: write     # needed for merging PRs
+  issues: write            # needed for adding labels and comments
+
+jobs:
+  dependabot:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse update type
+        id: parse
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          if [[ "$title" =~ from[[:space:]]([0-9]+)\.([0-9]+)\.([0-9]+)[[:space:]]to[[:space:]]([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            old_major="${BASH_REMATCH[1]}"
+            old_minor="${BASH_REMATCH[2]}"
+            old_patch="${BASH_REMATCH[3]}"
+            new_major="${BASH_REMATCH[4]}"
+            new_minor="${BASH_REMATCH[5]}"
+            new_patch="${BASH_REMATCH[6]}"
+
+            if [[ $old_major != $new_major ]]; then
+              echo "type=major" >> $GITHUB_OUTPUT
+            elif [[ $old_minor != $new_minor ]]; then
+              echo "type=minor" >> $GITHUB_OUTPUT
+            else
+              echo "type=patch" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "type=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Auto-merge patch updates
+        if: steps.parse.outputs.type == 'patch'
+        uses: fastify/github-action-merge-dependabot@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label minor/major updates
+        if: steps.parse.outputs.type == 'minor' || steps.parse.outputs.type == 'major'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let label = '${{ steps.parse.outputs.type }}-update';
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['dependabot', label, 'needs-review']
+            });
+
+      - name: Comment for manual review
+        if: steps.parse.outputs.type == 'minor' || steps.parse.outputs.type == 'major'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let type = '${{ steps.parse.outputs.type }}';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `👀 **Manual review required**
+              
+              This is a **${type} update**. It will not be auto-merged because it may contain breaking changes.`
+                          });

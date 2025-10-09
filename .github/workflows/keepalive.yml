@@ -1,0 +1,16 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call clear-expired endpoint securely
+        run: |
+          curl -X DELETE "${{ secrets.API_URL }}/api/availability/cron/clear-expired" \
+          -H "Content-Type: application/json" \
+          -s -o /dev/null -w "%{http_code}"
