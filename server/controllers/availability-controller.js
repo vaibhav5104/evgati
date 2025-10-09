@@ -611,7 +611,10 @@ const clearExpiredBookingsForAllStations = async (req, res) => {
       await station.save();
     }
 
-    res.status(200).json({ message: "✅ Expired bookings archived & cleared for all stations" });
+    return res.status(200).json({
+      success: true,
+      message: "✅ Expired bookings archived & cleared for all stations"
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error clearing expired bookings for all stations",
