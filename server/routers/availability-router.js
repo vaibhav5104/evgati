@@ -54,4 +54,6 @@ router.post('/:stationId/clear-notifications', authMiddleware, availabilityContr
 // Clear expired bookings
 router.delete("/:stationId/clear", availabilityController.clearExpiredBookings);
 
+router.delete("/cron/clear-expired", availabilityController.clearExpiredBookingsForAllStations);
+
 module.exports = router;

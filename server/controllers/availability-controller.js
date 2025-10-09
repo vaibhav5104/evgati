@@ -552,6 +552,74 @@ const clearStationNotifications = async (req, res) => {
   }
 };
 
+// Clear expired bookings for ALL stations (Cron job)
+const clearExpiredBookingsForAllStations = async (req, res) => {
+  try {
+    const stations = await Station.find();
+
+    if (!stations.length) {
+      return res.status(404).json({ message: "No stations found" });
+    }
+
+    const now = new Date();
+
+    for (const station of stations) {
+      let availability = await Availability.findOne({ stationId: station._id });
+
+      if (!availability) continue;
+
+      // 1️⃣ Collect expired bookings
+      const expiredBookings = availability.bookings.filter(
+        (b) => new Date(b.endTime) <= now
+      );
+
+      // ✅ Save expired bookings into history before removing
+      if (expiredBookings.length > 0) {
+        const historyDocs = expiredBookings.map((b) => ({
+          stationId: station._id,
+          ownerId: station.owner,
+          userId: b.userId,
+          portId: b.portId,
+          startTime: b.startTime,
+          endTime: b.endTime,
+          status: b.status
+        }));
+        await History.insertMany(historyDocs);
+      }
+
+      // 2️⃣ Remove expired bookings from availability
+      availability.bookings = availability.bookings.filter(
+        (b) => new Date(b.endTime) > now
+      );
+
+      // 3️⃣ Remove expired bookings from station ports
+      station.ports.forEach(port => {
+        port.bookings = port.bookings.filter(b => new Date(b.endTime) > now);
+      });
+
+      // 4️⃣ Recalculate active bookings
+      const activeBookings = availability.bookings.filter(
+        (b) => b.status === "accepted" && now >= b.startTime && now <= b.endTime
+      );
+
+      // 5️⃣ Update port status
+      availability.occupiedPorts = activeBookings.map(b => b.portId.toString());
+      availability.is_available = activeBookings.length === 0;
+      availability.last_updated = now;
+
+      await availability.save();
+      await station.save();
+    }
+
+    res.json({ message: "✅ Expired bookings archived & cleared for all stations" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error clearing expired bookings for all stations",
+      error: error.message
+    });
+  }
+};
+
 module.exports = { 
   bookPort, 
   getAvailability, 
@@ -561,6 +629,7 @@ module.exports = {
   getPendingRequests, 
   getUserRequests,
   isPending,
-  clearUserNotifications,  // Add new controllers
-  clearStationNotifications 
+  clearUserNotifications,  
+  clearStationNotifications ,
+  clearExpiredBookingsForAllStations
 };
