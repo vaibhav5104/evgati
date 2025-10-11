@@ -4,7 +4,6 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { stationService } from "../services/stationService";
 import { useAuth } from "../hooks/useAuth";
-import Button from "../components/ui/Button";
 
 // Fix Leaflet default marker icons
 delete L.Icon.Default.prototype._getIconUrl;

@@ -51,7 +51,7 @@ const PendingStationsList = () => {
           {stations.map((station) => (
             <tr key={station._id} className="border-b">
               <td className="py-2 px-4">{station.name}</td>
-              <td className="py-2 px-4">{station.location}</td>
+              {/* <td className="py-2 px-4">{station.location}</td> */}
               <td className="py-2 px-4">{station.ownerName || "-"}</td>
               <td className="py-2 px-4 flex gap-2">
                 <Button color="success" onClick={() => handleApprove(station._id)}>

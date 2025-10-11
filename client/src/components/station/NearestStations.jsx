@@ -22,7 +22,7 @@ const NearestStations = ({
       setLoading(true);
       try {
         // Use the existing findNearestStations method
-        const result = await stationService.findNearestStations(
+        const result = await stationService.findNearestStation(
           location.latitude, 
           location.longitude
         );

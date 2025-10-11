@@ -9,10 +9,10 @@ const ProtectedRoute = ({
   requiredRoles = [], 
   fallback = "/login" 
 }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="xl" />
@@ -25,12 +25,16 @@ const ProtectedRoute = ({
   }
 
   // Check for specific role requirement
-  if (requiredRole && user?.role !== requiredRole) {
+  if (requiredRole && user?.role?.toLowerCase() !== requiredRole.toLowerCase()) {
     return <Navigate to="/unauthorized" replace />;
-  }
+  } 
 
-  // Check for multiple roles requirement
-  if (requiredRoles.length > 0 && !requiredRoles.includes(user?.role)) {
+
+  // Multi-role check
+  if (
+    requiredRoles.length > 0 &&
+    !requiredRoles.map((r) => r.toLowerCase()).includes(user?.role?.toLowerCase())
+  ) {
     return <Navigate to="/unauthorized" replace />;
   }
 

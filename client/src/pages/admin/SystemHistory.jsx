@@ -1,43 +1,111 @@
 import React, { useEffect, useState } from "react";
 import { historyService } from "../../services/historyService";
+import { stationService } from "../../services/stationService";
 
 const SystemHistory = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ Fetch system history + station names
   useEffect(() => {
     const fetchLogs = async () => {
       setLoading(true);
       try {
+        // 1️⃣ Fetch history list
         const data = await historyService.getAdminHistory();
-        setLogs(data);
+        const historyArray = data.history || [];
+
+        // 2️⃣ For each log with valid stationId, fetch station name
+        const logsWithStationNames = await Promise.all(
+          historyArray.map(async (log) => {
+            if (log.stationId) {
+              try {
+                const station = await stationService.getStationById(log.stationId);
+                return { ...log, stationName: station.name };
+              } catch (err) {
+                console.warn("Failed to fetch station:", log.stationId, err.message);
+                return { ...log, stationName: "Unknown Station" };
+              }
+            } else {
+              return { ...log, stationName: "Unknown Station" };
+            }
+          })
+        );
+
+        setLogs(logsWithStationNames);
         setError(null);
-        console.log(logs)
       } catch (err) {
+        console.error(err);
         setError("Failed to fetch system history.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
+
     fetchLogs();
   }, []);
 
+  if (loading) return <div className="p-6">Loading system history...</div>;
+  if (error) return <div className="p-6 text-red-600">{error}</div>;
+  if (!logs.length)
+    return <div className="p-6 text-gray-500">No history records found yet.</div>;
+
   return (
     <div className="min-h-screen bg-white p-6">
-      <h1 className="text-2xl font-bold text-blue-600 mb-4">System History</h1>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <ul className="divide-y divide-gray-200">
-          {logs.map((log, idx) => (
-            <li key={idx} className="py-2">
-              <span className="font-semibold text-gray-700">{log.action}</span> -
-              <span className="text-gray-500 ml-2">{log.timestamp}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <h1 className="text-2xl font-bold text-blue-600 mb-6">
+        System History
+      </h1>
+
+      <ul className="divide-y divide-gray-200">
+        {logs.map((log, idx) => (
+          <li key={log._id || idx} className="py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              {/* Station & Port */}
+              <div>
+                <p className="text-gray-800 font-semibold">
+                  {log.stationName} — Port {log.portId}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Status:{" "}
+                  <span
+                    className={`font-medium ${
+                      log.status === "accepted"
+                        ? "text-green-600"
+                        : log.status === "rejected"
+                        ? "text-red-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {log.status.toUpperCase()}
+                  </span>
+                </p>
+              </div>
+
+              {/* Time */}
+              <div className="text-sm text-gray-400">
+                {log.startTime && (
+                  <p>
+                    {new Date(log.startTime).toLocaleString()} →{" "}
+                    {new Date(log.endTime).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Owner / User Info */}
+            <div className="mt-2 text-sm text-gray-500">
+              <p>
+                <strong>Owner:</strong> {log.ownerId?.name} (
+                {log.ownerId?.email})
+              </p>
+              <p>
+                <strong>User:</strong> {log.userId?.name} ({log.userId?.email})
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

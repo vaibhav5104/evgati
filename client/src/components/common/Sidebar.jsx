@@ -10,7 +10,7 @@ const Sidebar = () => {
     // { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
     { label: 'Manage Stations', path: '/admin/stations', icon: 'stations' },
     { label: 'Manage Users', path: '/admin/users', icon: 'users' },
-    { label: 'Pending Approvals', path: '/admin/approvals', icon: 'pending' },
+    { label: 'Pending Approvals', path: '/admin/pending', icon: 'pending' },
     { label: 'System History', path: '/admin/history', icon: 'history' }
   ];
 
