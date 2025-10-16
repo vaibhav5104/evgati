@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true, minlength: 6 },
+    phone: { type: Number, required: true, minlength: 10 },
+    stats: {
+      totalBookings: { type: Number, default: 0 },
+      completedBookings: { type: Number, default: 0 },
+      cancelledBookings: { type: Number, default: 0 }
+    },
     role: {
       type: String,
       enum: ["user", "admin", "owner"],

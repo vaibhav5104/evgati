@@ -3,57 +3,91 @@ const User = require("../models/user-model");
 const Availability = require("../models/availability-model");
 const availabilityController = require("../controllers/availability-controller")
 const {addNotification} = require("../controllers/notification-controller");
+
 // Create a new station (goes to pending)
 const createStation = async (req, res) => {
   try {
-    // robust user id extraction:
+    // ✅ Extract authenticated user ID safely
     const userId = (req.user && (req.user._id || req.userID || req.user.userId)) || null;
-    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
 
-    const { latitude, longitude, address } = req.body.location;
+    // ✅ Get owner details to auto-fill contact info
+    const owner = await User.findById(userId);
+    if (!owner) {
+      return res.status(404).json({ message: "Owner not found" });
+    }
 
+    // ✅ Validate location
+    const { latitude, longitude, address } = req.body.location || {};
+    if (!latitude || !longitude || !address) {
+      return res.status(400).json({ message: "Location details are incomplete" });
+    }
+
+    // ✅ Prevent duplicate stations at same coordinates
     const existing = await Station.findOne({
-      $or: [
-        { "location.latitude": latitude, "location.longitude": longitude }
-      ]
+      "location.latitude": latitude,
+      "location.longitude": longitude,
     });
+
     if (existing) {
       return res.status(400).json({ message: "Station already exists at this location" });
     }
 
-    const station = new Station({ ...req.body, owner: userId, status: "pending" });
+    // ✅ Auto-generate port array
+    const totalPorts = req.body.totalPorts || 1;
+    const ports = Array.from({ length: totalPorts }, (_, i) => ({
+      portNumber: i + 1,
+      bookings: [],
+    }));
+
+    // ✅ Create new station document
+    const station = new Station({
+      ...req.body,
+      owner: userId,
+      status: "pending",
+      contact: {
+        phone: owner.phone || "",
+        email: owner.email || "",
+      },
+      ports,
+    });
+
     await station.save();
 
-    console.log(req.user);
-
-    // create availability for this station
+    // ✅ Initialize station availability
     await Availability.create({
       stationId: station._id,
       bookings: [],
       occupiedPorts: [],
-      is_available: true
+      is_available: true,
     });
 
-    // Add request to user profile (ensure user model has stationRequests array)
+    // ✅ Add request reference to user's profile
     await User.findByIdAndUpdate(userId, {
-      $addToSet: { stationRequests: station._id } // addToSet prevents duplicates
+      $addToSet: { stationRequests: station._id }, // avoids duplicates
     });
 
-    // ✅ Notify admin about new pending station
+    // ✅ Notify admin of new pending station (optional, if you use notifications)
     const admin = await User.findOne({ role: "admin" });
-    if (admin) {
+    if (admin && typeof addNotification === "function") {
       await addNotification(
         admin._id,
         "station",
         "New Station Request",
-        `${req.user.name} submitted a new station "${station.name}" for approval.`,
+        `${owner.name || "A user"} submitted a new station "${station.name}" for approval.`,
         station._id,
         "Station"
       );
     }
 
-    res.status(201).json({ message: "Station submitted for review", station });
+    res.status(201).json({
+      message: "Station submitted for review successfully.",
+      station,
+    });
   } catch (error) {
+    console.error("Error creating station:", error);
     res.status(500).json({ message: "Error creating station", error: error.message });
   }
 };
@@ -105,29 +139,106 @@ const getAllPendingStations = async (req, res) => {
   }
 };
 
-// Update a station
 const updateStation = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(req.body);
-    const { name, location, totalPorts } = req.body;
 
+    // Destructure possible fields from body
+    const {
+      name,
+      location,
+      totalPorts,
+      description,
+      city,
+      state,
+      pincode,
+      pricing,
+      chargerTypes,
+      amenities,
+      operatingHours,
+      images,
+    } = req.body;
+
+    // 🔍 Find the station
     const station = await Station.findById(id);
     if (!station) return res.status(404).json({ message: "Station not found" });
 
-    // 🔹 Update only allowed fields
+    // 🔒 (Optional) Check if user owns this station or is admin
+    if (
+      req.user.role !== "admin" &&
+      station.owner.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // ✅ Update allowed simple fields
     if (name) station.name = name;
+    if (description) station.description = description;
+    if (city) station.city = city;
+    if (state) station.state = state;
+    if (pincode) station.pincode = pincode;
+
+    // ✅ Update location if provided
     if (location) {
-      if (location.latitude) station.location.latitude = location.latitude;
-      if (location.longitude) station.location.longitude = location.longitude;
+      if (typeof location.latitude === "number")
+        station.location.latitude = location.latitude;
+      if (typeof location.longitude === "number")
+        station.location.longitude = location.longitude;
       if (location.address) station.location.address = location.address;
     }
 
-    // 🔹 Handle totalPorts update
-    if (totalPorts !== undefined) {
+    // ✅ Update pricing if provided
+    if (pricing) {
+      if (typeof pricing.perHour === "number")
+        station.pricing.perHour = pricing.perHour;
+      if (typeof pricing.perKWh === "number")
+        station.pricing.perKWh = pricing.perKWh;
+    }
+
+    // ✅ Update charger types and amenities if valid
+    const validChargerTypes = ["Type1", "Type2", "CCS", "CHAdeMO", "AC", "DC"];
+    const validAmenities = [
+      "wifi",
+      "restroom",
+      "cafe",
+      "parking",
+      "wheelchair_accessible",
+      "24x7",
+      "etc",
+    ];
+
+    if (Array.isArray(chargerTypes)) {
+      station.chargerTypes = chargerTypes.filter((t) =>
+        validChargerTypes.includes(t)
+      );
+    }
+
+    if (Array.isArray(amenities)) {
+      station.amenities = amenities.filter((a) =>
+        validAmenities.includes(a)
+      );
+    }
+
+    // ✅ Update operating hours
+    if (operatingHours) {
+      if (typeof operatingHours.open === "string")
+        station.operatingHours.open = operatingHours.open;
+      if (typeof operatingHours.close === "string")
+        station.operatingHours.close = operatingHours.close;
+      if (typeof operatingHours.is24x7 === "boolean")
+        station.operatingHours.is24x7 = operatingHours.is24x7;
+    }
+
+    // ✅ Update images if provided
+    if (Array.isArray(images)) {
+      station.images = images;
+    }
+
+    // ✅ Handle totalPorts expansion (not reduction)
+    if (typeof totalPorts === "number") {
       if (totalPorts < station.totalPorts) {
         return res.status(400).json({
-          message: "Reducing totalPorts is not allowed"
+          message: "Reducing totalPorts is not allowed",
         });
       }
       if (totalPorts > station.totalPorts) {
@@ -137,7 +248,7 @@ const updateStation = async (req, res) => {
         for (let i = 1; i <= portsToAdd; i++) {
           station.ports.push({
             portNumber: currentMax + i,
-            bookings: []
+            bookings: [],
           });
         }
 
@@ -145,11 +256,18 @@ const updateStation = async (req, res) => {
       }
     }
 
+    // ✅ Save changes
     await station.save();
 
-    res.json({ message: "Station updated successfully", station });
+    res.json({
+      message: "Station updated successfully",
+      station,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error updating station", error: error.message });
+    console.error("Error updating station:", error);
+    res
+      .status(500)
+      .json({ message: "Error updating station", error: error.message });
   }
 };
 
