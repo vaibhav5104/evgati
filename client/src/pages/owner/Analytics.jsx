@@ -1,24 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
-  AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import { 
-  Calendar, TrendingUp, Users, Star, Clock, DollarSign, 
-  Battery, MapPin, Activity, AlertCircle, ChevronDown,
-  Check, X, Loader2, Filter, Download, RefreshCw
+  TrendingUp, Users, Star, Clock, DollarSign, Battery, MapPin, Activity, AlertCircle, Loader2, RefreshCw
 } from 'lucide-react';
 import { authService } from '../../services/authService';
 import { commentService } from '../../services/commentService';
 import { stationService } from '../../services/stationService';
 import { historyService } from '../../services/historyService';
+import { useAuth } from '../../hooks/useAuth';
 
 
 const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('monthly');
   const [selectedStation, setSelectedStation] = useState('all');
+  const {user} = useAuth()
   const [analyticsData, setAnalyticsData] = useState({
     owner: null,
     history: [],
@@ -35,7 +34,7 @@ const Analytics = () => {
     setLoading(true);
     try {
       // Fetch owner data
-      const owner = await authService.getUserById('68c294e112902e685584814c');
+      const owner = await authService.getUserById(user._id);
       
       // Fetch history
       const historyData = await historyService.getOwnerHistory();
@@ -49,7 +48,7 @@ const Analytics = () => {
         stationDetails[stationId] = station;
         
         const comments = await commentService.getComments(stationId);
-        allComments.push(...comments);
+        allComments.push(...comments.comments || []);
       }
       
       setAnalyticsData({

@@ -42,7 +42,8 @@ const stationSchema = new mongoose.Schema(
     }],
     amenities: [{//can be used as tags
       type: String,
-      enum: ["wifi", "restroom", "cafe", "parking", "wheelchair_accessible", "24x7", "etc"]
+      enum: ["wifi", "restroom", "cafe", "parking", "24x7"],
+      default : ["parking"]
     }],
     rating: {
       average: { type: Number, default: 0, min: 0, max: 5 },

@@ -127,7 +127,6 @@ const AuthProvider = ({ children }) => {
         storeTokenInLS(data.token);
         await userAuthentication(); // refresh user
       }
-
       return data;
     } catch (err) {
       console.error("Login error:", err.message);
@@ -156,6 +155,8 @@ const AuthProvider = ({ children }) => {
         storeTokenInLS(data.token);
         await userAuthentication();
       }
+
+      console.log("token : ",data.token)
 
       return data;
     } catch (err) {

@@ -118,6 +118,8 @@ const approveBookingRequest = async (req, res) => {
 
     booking.status = "accepted";
     booking.ownerMessage = ownerMessage || "";
+    booking.approvedAt = new Date();
+    booking.rejectedAt = null; // make mutually exclusive
 
     const port = station.ports.find((p) => p.portNumber === booking.portId);
     if (port) {
@@ -189,6 +191,8 @@ const rejectBookingRequest = async (req, res) => {
 
     booking.status = "rejected";
     booking.ownerMessage = ownerMessage || "Booking rejected by owner";
+    booking.rejectedAt = new Date();
+    booking.approvedAt = null;
 
     const port = station.ports.find((p) => p.portNumber === booking.portId);
     if (port) {
@@ -335,6 +339,8 @@ const getAvailability = async (req, res) => {
     availability.occupiedPorts = activeBookings.map((b) => b.portId.toString());
     availability.is_available = activeBookings.length < availability.stationId.totalPorts;
     availability.last_updated = now;
+    availability.currentOccupied = availability.occupiedPorts.length;
+    availability.currentAvailable = station.totalPorts - availability.currentOccupied;
 
     await availability.save();
     await station.save();

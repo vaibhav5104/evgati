@@ -76,12 +76,14 @@ const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
           const data = await res.json();
           setIsStillPending(data.status === "pending");
         } else if (notification.type === "booking" && notification.stationId && notification.relatedId) {
-          const res = await fetch(`${API_BASE_URL}/api/availability/${notification.stationId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
+          const res = await fetch(
+            `${API_BASE_URL}/api/availability/${notification.stationId}/bookings/${notification.relatedId}/status`, 
+            {
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            }
+          );
           const data = await res.json();
-          const booking = data.bookings?.find(b => b._id === notification.relatedId);
-          setIsStillPending(booking?.status === "pending");
+          setIsStillPending(data.status === "pending");
         }
       } catch (err) {
         console.error("Error checking pending status:", err);
@@ -89,8 +91,8 @@ const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
       }
     };
 
-    if (notification.relatedId) {
-      checkPending();
+    if (notification.relatedId && (notification.type === 'station' || notification.type === 'booking')) {
+        checkPending();
     }
   }, [notification]);
 
