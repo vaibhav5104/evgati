@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth';
 import { MainLayout, AuthLayout, DashboardLayout } from './layouts';
 import {
@@ -61,7 +60,6 @@ const Unauthorized = () => (
 export const App = () => {
   return (
     <ErrorBoundary>
-      <AuthProvider>
         <Router>
           <Routes>
             {/* Public routes with MainLayout */}
@@ -152,7 +150,6 @@ export const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
-      </AuthProvider>
     </ErrorBoundary>
   );
 };
