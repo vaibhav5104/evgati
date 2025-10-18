@@ -127,7 +127,7 @@ const Navbar = () => {
               <div className="relative">
                 <img
                   className="h-9 w-auto transition-transform group-hover:scale-105"
-                  src="../../../public/images/Logo2.png"
+                  src="https://evgati.vercel.app/Logo2.png"
                   alt="EvGati Logo"
                 />
               </div>

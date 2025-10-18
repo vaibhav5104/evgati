@@ -1,73 +1,58 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth';
 import { MainLayout, AuthLayout, DashboardLayout } from './layouts';
-import {
-  Home,
-  Login,
-  Register,
-  Dashboard,
-  Stations,
-  StationDetails,
-  Profile,
-  AddStation,
-  BookingPage,
-  AdminDashboard,
-  ManageStations,
-  ManageUsers,
-  PendingApprovals,
-  SystemHistory,
-  OwnerDashboard,
-  MyStations,
-  StationRequests,
-  Analytics,
-  OwnerHistory,
-  Bookings,
-  BookingHistory,
-} from './pages';
+import { ScrollToTop } from './components/common/ScrollToTop';
+import { LoadingFallback } from './components/common/LoadingFallback';
+import { NotFound } from './pages/NotFound';
+import { Unauthorized } from './pages/Unauthorized';
+
+// Lazy load page components that exist
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Stations = lazy(() => import('./pages/Stations'));
+const StationDetails = lazy(() => import('./pages/StationDetails'));
+const AddStation = lazy(() => import('./pages/AddStation'));
+const Profile = lazy(() => import('./pages/Profile'));
+
+const BookingPage = lazy(() => import('./pages/BookingPage'));
+const Bookings = lazy(() => import('./pages/booking/Bookings'));
+const BookingHistory = lazy(() => import('./pages/booking/BookingHistory'));
+
+// Admin pages 
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const ManageStations = lazy(() => import('./pages/admin/ManageStations'));
+const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'));
+const PendingApprovals = lazy(() => import('./pages/admin/PendingApprovals'));
+const SystemHistory = lazy(() => import('./pages/admin/SystemHistory'));
+
+// Owner pages 
+const OwnerDashboard = lazy(() => import('./pages/owner/OwnerDashboard'));
+const MyStations = lazy(() => import('./pages/owner/MyStations'));
+const StationRequests = lazy(() => import('./pages/owner/StationRequests'));
+const Analytics = lazy(() => import('./pages/owner/Analytics'));
+const OwnerHistory = lazy(() => import('./pages/owner/OwnerHistory'));
 
 // Error boundary component
 const ErrorBoundary = ({ children }) => {
   return children;
 };
 
-// 404 Not Found page
-const NotFound = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="text-center">
-      <h1 className="text-6xl font-bold text-gray-700 mb-4">404</h1>
-      <p className="text-xl text-gray-600 mb-8">Page not found</p>
-      <a href="/" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        Go Home
-      </a>
-    </div>
-  </div>
-);
-
-// Unauthorized access page
-const Unauthorized = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="text-center">
-      <h1 className="text-6xl font-bold text-red-600 mb-4">403</h1>
-      <p className="text-xl text-gray-600 mb-8">Access Denied</p>
-      <a href="/dashboard" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        Go to Dashboard
-      </a>
-    </div>
-  </div>
-);
-
 export const App = () => {
   return (
     <ErrorBoundary>
-        <Router>
+      <Router>
+        <ScrollToTop/>
+        <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Public routes with MainLayout */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Home />} />
-            <Route path="stations" element={<Stations />} />
-            <Route path="stations/:id" element={<StationDetails />} />
-            <Route path="stations/:id/book" element={<BookingPage />} />
+              <Route path="stations" element={<Stations />} />
+              <Route path="stations/:id" element={<StationDetails />} />
+              <Route path="stations/:id/book" element={<BookingPage />} />
             </Route>
 
             {/* Auth routes with AuthLayout */}
@@ -149,7 +134,8 @@ export const App = () => {
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Router>
+        </Suspense>
+      </Router>
     </ErrorBoundary>
   );
 };

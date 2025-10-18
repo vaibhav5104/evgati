@@ -27,7 +27,7 @@ const DashboardLayout = () => {
             <div className="md:col-span-1">
               <div className="flex items-center space-x-2 mb-4">
                 <img
-                  src="../../../public/images/Logo2.png"
+                  src="https://evgati.vercel.app/Logo2.png"
                   alt="EvGati"
                   className="h-8 w-auto"
                 />
