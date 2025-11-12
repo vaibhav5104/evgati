@@ -210,5 +210,5 @@ This project is licensed under the MIT License.
 ## 📞 Support
 
 For support and questions:
-- Email: support@evgati.com
+- Email: vaibhavsharma5104@gmail.com
 - GitHub Issues: [Create an issue](https://github.com/your-org/evgati-frontend/issues)

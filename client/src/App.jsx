@@ -16,6 +16,10 @@ const Stations = lazy(() => import('./pages/Stations'));
 const StationDetails = lazy(() => import('./pages/StationDetails'));
 const AddStation = lazy(() => import('./pages/AddStation'));
 const Profile = lazy(() => import('./pages/Profile'));
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+const HowItWorks = lazy(() => import('./pages/HowItWorks'));
+const FAQs = lazy(() => import('./pages/FAQs'));
+const ContactUs = lazy(() => import('./pages/ContactUs'));
 
 const BookingPage = lazy(() => import('./pages/BookingPage'));
 const Bookings = lazy(() => import('./pages/booking/Bookings'));
@@ -50,6 +54,10 @@ export const App = () => {
             {/* Public routes with MainLayout */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Home />} />
+              <Route path="about" element={<AboutUs />} />
+              <Route path="how-it-works" element={<HowItWorks />} />
+              <Route path="contact" element={<ContactUs />} />
+              <Route path="faq" element={<FAQs />} />
               <Route path="stations" element={<Stations />} />
               <Route path="stations/:id" element={<StationDetails />} />
               <Route path="stations/:id/book" element={<BookingPage />} />

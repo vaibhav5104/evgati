@@ -52,7 +52,7 @@ const Navbar = () => {
     ];
 
     const userLinks = [
-      { label: 'Stations', path: '/stations', icon: 'stations' },
+      // { label: 'Stations', path: '/stations', icon: 'stations' },
       { label: 'My Bookings', path: '/my-bookings', icon: 'bookings' },
       { label: 'Profile', path: '/profile', icon: 'profile' }
     ];
@@ -119,8 +119,13 @@ const Navbar = () => {
   return (
     <>
       {/* Main Navbar */}
-      <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<nav
+  className="sticky top-0 z-50 backdrop-blur-md shadow-sm border-b border-gray-100 bg-cover bg-center"
+  // style={{
+  //   backgroundImage:
+  //     "url('https://images.pexels.com/photos/221421/pexels-photo-221421.jpeg?auto=compress&cs=tinysrgb&w=1600')",
+  // }}
+>      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center group">
@@ -150,6 +155,25 @@ const Navbar = () => {
                       }`}
                     >
                       <Icon className="w-4 h-4" />
+                      <span>{link.label}</span>
+                    </Link>
+                  );
+                })}
+                
+                {user && sidebarLinks.map((link) => {
+                  const Icon = iconMap[link.icon];
+                  const isActive = isActivePath(link.path);
+                  return (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? "bg-blue-100 text-blue-600"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      }`}
+                    >
+                      {Icon && <Icon className="w-4 h-4" />}
                       <span>{link.label}</span>
                     </Link>
                   );
@@ -258,39 +282,6 @@ const Navbar = () => {
               </button> */}
             </div>
           </div>
-        </div>
-
-        <div className="flex justify-center">
-          {user && (
-            <div
-              className="hidden md:block bg-red-100 backdrop-blur-md 
-                        border border-gray-200 rounded-xl {/* Changed: border-t to border and added rounded-xl */}
-                        items-center justify-center w-fit box-border"
-            >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-2 ">
-                <div className="flex items-center space-x-1 py-2">
-                  {sidebarLinks.map((link) => {
-                    const Icon = iconMap[link.icon];
-                    const isActive = isActivePath(link.path);
-                    return (
-                      <Link
-                        key={link.path}
-                        to={link.path}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          isActive
-                            ? "bg-blue-100 text-blue-600"
-                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        }`}
-                      >
-                        {Icon && <Icon className="w-4 h-4" />}
-                        <span>{link.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Mobile Dropdown Menu */}

@@ -9,11 +9,11 @@ const MainLayout = () => {
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="bg-white shadow-md py-12">
+      <footer className="bg-gray-900 shadow-md py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">EvGati</h3>
+              <h3 className="text-lg font-semibold text-yellow-900 mb-4">EvGati</h3>
               <p className="text-sm text-gray-600">
                 Powering electric vehicle charging solutions across India.
               </p>
@@ -21,7 +21,7 @@ const MainLayout = () => {
             <div>
               <h4 className="text-sm font-semibold text-gray-700 mb-3">Quick Links</h4>
               <ul className="space-y-2">
-                <li><a href="/stations" className="text-sm text-gray-600 hover:text-gray-900">Charging Stations</a></li>
+                <li><a href="/stations" className="text-sm text-gray-600 hover:text-gray-900 ">Charging Stations</a></li>
                 <li><a href="/my-bookings" className="text-sm text-gray-600 hover:text-gray-900">My Bookings</a></li>
                 <li><a href="/about" className="text-sm text-gray-600 hover:text-gray-900">About Us</a></li>
               </ul>
@@ -29,7 +29,7 @@ const MainLayout = () => {
             <div>
               <h4 className="text-sm font-semibold text-gray-700 mb-3">Support</h4>
               <ul className="space-y-2">
-                <li><a href="/help" className="text-sm text-gray-600 hover:text-gray-900">Help Center</a></li>
+                <li><a href="/how-it-works" className="text-sm text-gray-600 hover:text-gray-900">Help Center</a></li>
                 <li><a href="/contact" className="text-sm text-gray-600 hover:text-gray-900">Contact Us</a></li>
                 <li><a href="/faq" className="text-sm text-gray-600 hover:text-gray-900">FAQ</a></li>
               </ul>
@@ -46,7 +46,7 @@ const MainLayout = () => {
           
           <div className="mt-8 pt-8 border-t border-gray-200 flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              © {new Date().getFullYear()} EvGati Technologies Pvt. Ltd. All rights reserved.
+              © {new Date().getFullYear()} EvGati By Vaibhav Sharma. All rights reserved.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-gray-600">

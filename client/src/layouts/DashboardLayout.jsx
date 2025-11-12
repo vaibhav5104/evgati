@@ -37,7 +37,7 @@ const DashboardLayout = () => {
               </p>
               <div className="flex space-x-3">
                 <a
-                  href="https://twitter.com/evgati"
+                  href="https://x.com/vaibhav5104"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
@@ -46,7 +46,7 @@ const DashboardLayout = () => {
                   <Twitter className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://linkedin.com/company/evgati"
+                  href="https://www.linkedin.com/in/vaibhav5104"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
@@ -55,7 +55,7 @@ const DashboardLayout = () => {
                   <Linkedin className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://github.com/evgati"
+                  href="https://github.com/vaibhav5104"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
@@ -115,7 +115,7 @@ const DashboardLayout = () => {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="/help"
+                    href="/how-it-works"
                     className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200"
                   >
                     Help Center
@@ -157,25 +157,16 @@ const DashboardLayout = () => {
                 <li className="flex items-start space-x-2">
                   <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                   <span className="text-sm text-gray-600">
-                    123 EV Street, Tech City, TC 12345
+                    Jalandhar, Punjab 144008
                   </span>
                 </li>
                 <li className="flex items-center space-x-2">
                   <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
                   <a
-                    href="mailto:support@evgati.com"
+                    href="mailto:vaibhavsharma5104@gmail.com"
                     className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
                   >
-                    support@evgati.com
-                  </a>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                  <a
-                    href="tel:+1234567890"
-                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    +1 (234) 567-890
+                    vaibhavsharma5104@gmail.com
                   </a>
                 </li>
               </ul>

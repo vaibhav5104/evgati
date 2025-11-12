@@ -4,7 +4,7 @@ import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
-const StationCard = ({ station, onClose, isExpanded = false }) => {
+const StationCard = ({ station, onClose, isExpanded = true }) => {
   const navigate = useNavigate();
 
   if (!isExpanded) {
@@ -40,14 +40,14 @@ const StationCard = ({ station, onClose, isExpanded = false }) => {
     <div className="h-full bg-white overflow-hidden flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 relative">
-        <button
+        {/* <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-        </button>
+        </button> */}
         
         <div className="pr-12">
           <h1 className="text-xl font-bold leading-tight">{station.name}</h1>

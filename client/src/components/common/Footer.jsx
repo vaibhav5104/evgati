@@ -85,8 +85,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@evgati.com" className="text-gray-300 hover:text-white transition-colors">
-                  support@evgati.com
+                <a href="mailto:vaibhavsharma5104@gmail.com" className="text-gray-300 hover:text-white transition-colors">
+                  vaibhavsharma5104@gmail.com
                 </a>
               </li>
             </ul>

@@ -84,8 +84,13 @@ const Stations = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {loading ? (
+<div
+  className="min-h-screen bg-cover bg-center p-6"
+  style={{
+    backgroundImage:
+      "url('https://images.pexels.com/photos/1119976/pexels-photo-1119976.jpeg?auto=compress&cs=tinysrgb&w=1600')",
+  }}
+>      {loading ? (
         <div className="flex justify-center items-center h-screen">
           <LoadingSpinner />
         </div>
