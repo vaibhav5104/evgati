@@ -11,7 +11,8 @@ const getAllHistory = async (req, res) => {
 
     res.json({ count: history.length, history });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching all history", error: error.message });
+    console.error("Error fetching all history:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -26,7 +27,8 @@ const getOwnerHistory = async (req, res) => {
 
     res.json({ count: history.length, history });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching owner history", error: error.message });
+    console.error("Error fetching owner history:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -41,7 +43,8 @@ const getUserHistory = async (req, res) => {
 
     res.json({ count: history.length, history });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching user history", error: error.message });
+    console.error("Error fetching user history:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
