@@ -12,26 +12,16 @@ const SystemHistory = () => {
     const fetchLogs = async () => {
       setLoading(true);
       try {
-        // 1️⃣ Fetch history list
         const data = await historyService.getAdminHistory();
         const historyArray = data.history || [];
 
-        // 2️⃣ For each log with valid stationId, fetch station name
-        const logsWithStationNames = await Promise.all(
-          historyArray.map(async (log) => {
-            if (log.stationId) {
-              try {
-                const station = await stationService.getStationById(log.stationId);
-                return { ...log, stationName: station.name };
-              } catch (err) {
-                console.warn("Failed to fetch station:", log.stationId, err.message);
-                return { ...log, stationName: "Unknown Station" };
-              }
-            } else {
-              return { ...log, stationName: "Unknown Station" };
-            }
-          })
-        );
+        // No need to fetch station again because populate already gives stationId.name
+        const logsWithStationNames = historyArray.map((log) => {
+          return {
+            ...log,
+            stationName: log.stationId?.name ?? "Unknown Station"
+          };
+        });
 
         setLogs(logsWithStationNames);
         setError(null);
@@ -45,6 +35,7 @@ const SystemHistory = () => {
 
     fetchLogs();
   }, []);
+
 
   if (loading) return <div className="p-6">Loading system history...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
