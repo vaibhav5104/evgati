@@ -30,7 +30,7 @@ const ManageStations = () => {
     setLoading(true);
     try {
       const data = await stationService.getAllStations();
-      console.log("All stations:", data);
+      // console.log("All stations:", data);
       
       // Ensure stations is always an array
       const safeData = Array.isArray(data) ? data : Array.isArray(data?.stations) ? data.stations : [];

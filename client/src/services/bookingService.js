@@ -113,7 +113,7 @@ getUserBookings: async () => {
 
     // Always normalize to array
     const requests = response.data?.requests || [];
-    console.log("User bookings response:", requests);
+    // console.log("User bookings response:", requests);
 
     return Array.isArray(requests) ? requests : [];
   } catch (error) {

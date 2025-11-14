@@ -8,7 +8,8 @@ exports.getNotifications = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json({ notifications: user.notifications });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching notifications", error });
+    console.log("Error : ",error.message)
+    res.status(500).json({ message: "Error fetching notifications" });
   }
 };
 
@@ -27,7 +28,8 @@ exports.markAsRead = async (req, res) => {
     await user.save();
     res.json({ message: "Notification marked as read", notification });
   } catch (error) {
-    res.status(500).json({ message: "Error marking as read", error });
+    console.log("Error : ",error.message)
+    res.status(500).json({ message: "Error marking as read"});
   }
 };
 
@@ -40,7 +42,8 @@ exports.markAllAsRead = async (req, res) => {
     );
     res.json({ message: "All notifications marked as read" });
   } catch (error) {
-    res.status(500).json({ message: "Error updating notifications", error });
+    console.log("Error : ",error.message)
+    res.status(500).json({ message: "Error updating notifications"});
   }
 };
 
@@ -64,7 +67,7 @@ exports.addNotification = async (userId, type, title, message, relatedId, onMode
       { new: true }
     );
   } catch (error) {
-    console.error("Error adding notification:", error);
+    console.log("Error adding notification:", error);
   }
 };
 
@@ -98,6 +101,6 @@ exports.createNotification = async (req, res) => {
       });
     } catch (error) {
       console.error("Error creating notification:", error);
-      res.status(500).json({ message: "Server error", error });
+      res.status(500).json({ message: "Server error" });
     }
   };

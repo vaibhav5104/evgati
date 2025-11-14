@@ -34,20 +34,10 @@ const AboutUs = () => {
 
   const team = [
     {
-      name: 'Priya Sharma',
-      role: 'CEO & Founder',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop'
+      name: 'Vaibhav Sharma',
+      role: 'Application Owner',
+      image: 'https://images.unsplash.com/vector-1761076906848-d35f0c4e65d5?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
     },
-    {
-      name: 'Rahul Verma',
-      role: 'CTO',
-      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop'
-    },
-    {
-      name: 'Anjali Patel',
-      role: 'Head of Operations',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop'
-    }
   ];
 
   return (

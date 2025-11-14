@@ -23,7 +23,7 @@ const ManageUsers = () => {
     setLoading(true);
     try {
       const data = await authService.getAllUsers();
-      console.log("All users:", data);
+      // console.log("All users:", data);
       
       // Ensure users is always an array
       const safeData = Array.isArray(data) ? data : Array.isArray(data?.users) ? data.users : [];

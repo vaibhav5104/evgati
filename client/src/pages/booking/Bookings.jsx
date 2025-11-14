@@ -20,7 +20,7 @@ const Bookings = () => {
       }
 
       const data = await bookingService.getUserBookings();
-      console.log("Booking data received:", data);
+      // console.log("Booking data received:", data);
       
       // Ensure bookings is always an array
       const safeData = Array.isArray(data)
