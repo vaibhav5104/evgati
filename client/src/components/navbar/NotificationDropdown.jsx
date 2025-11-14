@@ -8,8 +8,6 @@ import {
 } from "lucide-react";
 import NotificationItem from "./NotificationItem";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-
 const NotificationDropdown = ({ isOpen, onClose, notifications, loading, onNotificationRead }) => {
   const dropdownRef = useRef(null);
   const [expanded, setExpanded] = useState(true);
@@ -42,7 +40,7 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, loading, onNotif
     e.stopPropagation(); // Prevent dropdown from closing
     
     try {
-      await fetch(`${API_BASE_URL}/api/notifications/read/all`, {
+      await fetch(`/api/notifications/read/all`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -63,7 +61,7 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, loading, onNotif
   // Handle single notification read
   const handleMarkAsRead = async (id) => {
     try {
-      await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, {
+      await fetch(`/api/notifications/${id}/read`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

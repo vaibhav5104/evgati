@@ -18,8 +18,6 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL;
-
   // Navigation icons mapping
   const iconMap = {
     dashboard: LayoutDashboard,
@@ -83,23 +81,23 @@ const Navbar = () => {
 
     setLoadingNotifications(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/user`, {
-        headers: { 
-          Authorization: `Bearer ${localStorage.getItem("token")}` 
+      const res = await fetch(`/api/auth/user`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
       const data = await res.json();
       const userNotifications = data?.userData?.notifications || [];
-      
+
       setNotifications(userNotifications);
       setUnreadCount(userNotifications.filter((n) => !n.isRead).length);
     } catch (error) {
-      console.error("Error fetching notifications:", error.message);
+      console.error("Error fetching notifications");
     } finally {
       setLoadingNotifications(false);
     }
-  }, [user, API_BASE_URL]);
+  }, [user]);
 
   useEffect(() => {
     if (user) {

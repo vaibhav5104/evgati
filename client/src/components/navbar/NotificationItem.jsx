@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Bell, Circle, Check, XCircle } from "lucide-react";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-
 const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
   const [loading, setLoading] = useState(false);
   const [actionTaken, setActionTaken] = useState(null);
@@ -70,14 +68,14 @@ const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
     const checkPending = async () => {
       try {
         if (notification.type === "station" && notification.relatedId) {
-          const res = await fetch(`${API_BASE_URL}/api/stations/${notification.relatedId}`, {
+          const res = await fetch(`/api/stations/${notification.relatedId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           const data = await res.json();
           setIsStillPending(data.status === "pending");
         } else if (notification.type === "booking" && notification.stationId && notification.relatedId) {
           const res = await fetch(
-            `${API_BASE_URL}/api/availability/${notification.stationId}/bookings/${notification.relatedId}/status`, 
+            `/api/availability/${notification.stationId}/bookings/${notification.relatedId}/status`, 
             {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             }
@@ -104,7 +102,7 @@ const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/availability/${notification.stationId}/approve/${notification.relatedId}`,
+        `/api/availability/${notification.stationId}/approve/${notification.relatedId}`,
         {
           method: "PATCH",
           headers: {
@@ -143,7 +141,7 @@ const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/availability/${notification.stationId}/reject/${notification.relatedId}`,
+        `/api/availability/${notification.stationId}/reject/${notification.relatedId}`,
         {
           method: "PATCH",
           headers: {
@@ -182,7 +180,7 @@ const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/stations/${notification.relatedId}/approve`,
+        `/api/admin/stations/${notification.relatedId}/approve`,
         {
           method: "POST",
           headers: {
@@ -218,7 +216,7 @@ const NotificationItem = ({ notification, onAction, onMarkAsRead }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/stations/${notification.relatedId}/reject`,
+        `/api/admin/stations/${notification.relatedId}/reject`,
         {
           method: "POST",
           headers: {
