@@ -87,8 +87,8 @@ const createStation = async (req, res) => {
       station,
     });
   } catch (error) {
-    console.error("Error creating station:", error);
-    res.status(500).json({ message: "Error creating station", error: error.message });
+    console.error("Error Creating Stations:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -107,7 +107,8 @@ const getAllStations = async (req, res) => {
     res.json(stations);
 
   } catch (error) {
-    res.status(500).json({ message: "Error fetching stations", error: error.message });
+    console.error("Error getting stations:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -118,7 +119,8 @@ const getStationById = async (req, res) => {
     if (!station) return res.status(404).json({ message: "Station not found" });
     res.json(station);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching station", error: error.message });
+    console.error("Error getting stations by id:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -135,7 +137,8 @@ const getAllPendingStations = async (req, res) => {
     const stations = await Station.find(query);
     res.json(stations);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching stations", error: error.message });
+    console.error("Error getting pending stations:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -264,10 +267,8 @@ const updateStation = async (req, res) => {
       station,
     });
   } catch (error) {
-    console.error("Error updating station:", error);
-    res
-      .status(500)
-      .json({ message: "Error updating station", error: error.message });
+    console.error("Error updating station:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -306,7 +307,8 @@ const deleteStation = async (req, res) => {
 
     res.json({ message: "Station deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Error deleting stations:", error.message);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
@@ -346,6 +348,7 @@ const findNearestStation = async (req, res) => {
     res.json({ nearestStation: nearest.station, distanceKm: nearest.distance });
   } catch (error) {
     res.status(500).json({ message: "Error finding nearest station", error: error.message });
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
   }
 };
 
