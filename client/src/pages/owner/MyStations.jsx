@@ -7,12 +7,19 @@ import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import Table  from "../../components/ui/Table";
 
 const MyStations = () => {
   const { user } = useAuth();
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const tableData = stations.map(station => ({
+  ...station,
+  id: station._id,   // For selection + keys
+}));
+
 
   const fetchMyStations = async () => {
     setLoading(true);
@@ -85,6 +92,65 @@ const MyStations = () => {
     );
   }
 
+  const columns = [
+  {
+    key: "name",
+    header: "Station",
+    render: (_, row) => (
+      <div className="flex items-center">
+        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-electric-500 rounded-lg flex items-center justify-center mr-3">
+          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-900">{row.name}</div>
+          <div className="text-xs text-gray-500">ID: {row._id.slice(-6)}</div>
+        </div>
+      </div>
+    )
+  },
+  {
+    key: "location",
+    header: "Location",
+    render: (val, row) => (
+      <div>
+        <div className="text-sm text-gray-900">{row.location.address}</div>
+        <div className="text-xs text-gray-500">
+          {row.location.latitude.toFixed(4)}, {row.location.longitude.toFixed(4)}
+        </div>
+      </div>
+    )
+  },
+  {
+    key: "totalPorts",
+    header: "Ports",
+  },
+  {
+    key: "status",
+    header: "Status",
+    render: (status) => (
+      <Badge variant={getStatusColor(status)}>
+        {status}
+      </Badge>
+    )
+  },
+  {
+    key: "actions",
+    header: "Actions",
+    render: (_, row) => (
+      <div className="space-x-2">
+        <Button variant="outline" size="sm" onClick={() => handleEditStation(row)}>
+          Edit
+        </Button>
+        <Button variant="danger" size="sm" onClick={() => handleDeleteStation(row)}>
+          Delete
+        </Button>
+      </div>
+    )
+  }
+];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -114,7 +180,7 @@ const MyStations = () => {
           <div className="text-sm text-gray-600">Total Stations</div>
         </Card>
         <Card className="text-center">
-          <div className="text-2xl font-bold text-electric-600 mb-1">
+          <div className="text-2xl font-bold text-green-600 mb-1">
             {stations.filter(s => s.status === 'accepted').length}
           </div>
           <div className="text-sm text-gray-600">Active</div>
@@ -138,8 +204,8 @@ const MyStations = () => {
         <Card className="bg-yellow-50 border-yellow-200">
           <div className="text-sm">
             <strong>Debug Info:</strong>
-            <br />
-            User ID: {user?._id}
+            {/* <br /> */}
+            {/* User ID: {user?._id} */}
             <br />
             User Role: {user?.role}
             <br />
@@ -176,6 +242,7 @@ const MyStations = () => {
           {stations.map((station) => (
             <StationCard
               key={station._id}
+              isExpanded={true}
               station={station}
               showActions={true}
               onEdit={handleEditStation}
@@ -232,7 +299,7 @@ const MyStations = () => {
           </div>
 
           {/* Content section */}
-          <div className="overflow-x-auto">
+          {/* <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -303,7 +370,14 @@ const MyStations = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+          </div> */}
+          <Table 
+            columns={columns}
+            data={tableData}
+            sortable={true}
+            itemsPerPage={5}
+            className=""
+          />
         </Card>
       )}
     </div>

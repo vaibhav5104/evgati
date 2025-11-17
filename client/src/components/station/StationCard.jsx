@@ -1,151 +1,399 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Badge from "../ui/Badge";
-import Button from "../ui/Button";
 import Card from "../ui/Card";
+import Button from "../ui/Button";
+import { 
+  MapPin, 
+  Zap, 
+  Navigation, 
+  Info, 
+  Calendar,
+  Wifi,
+  Coffee,
+  Clock,
+  Star,
+  ChevronRight
+} from "lucide-react";
 
-const StationCard = ({ station, onClose, isExpanded = true }) => {
+const StationCard = ({ station, onClose, isExpanded = false }) => {
   const navigate = useNavigate();
+
+  // Get status badge variant
+  const getStatusVariant = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'accepted': return 'success';
+      case 'pending': return 'warning';
+      case 'rejected': return 'error';
+      default: return 'success';
+    }
+  };
+
+  // Get amenity icons
+  const getAmenityIcon = (amenity) => {
+    switch(amenity.toLowerCase()) {
+      case 'wifi': return <Wifi className="w-4 h-4" />;
+      case 'cafe': return <Coffee className="w-4 h-4" />;
+      case '24x7': return <Clock className="w-4 h-4" />;
+      default: return <Info className="w-4 h-4" />;
+    }
+  };
+
+  // Calculate available ports
+  const availablePorts = station.totalPorts - (station.ports?.filter(p => p.bookings?.some(b => b.status === 'active')).length || 0);
 
   if (!isExpanded) {
     return (
-      <Card hover className="transition-shadow">
-        <div className="flex items-start justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-900">{station.name}</h2>
-          <Badge variant={station.status || 'success'}>{station.status || 'Active'}</Badge>
+      <Card 
+        hover 
+        variant="default"
+        padding="p-0"
+        className="overflow-hidden group cursor-pointer"
+        onClick={() => navigate(`/stations/${station._id}`)}
+      >
+        {/* Station Image with Overlapped Header */}
+        <div className="relative">
+          {station.images?.[0] ? (
+            <>
+              <img 
+                src={station.images[0]} 
+                alt={station.name}
+                className="w-full h-56 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            </>
+          ) : (
+            <>
+              <div className="relative h-56 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 flex items-center justify-center">
+                <Zap className="w-24 h-24 text-white opacity-20" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            </>
+          )}
+          
+          {/* Status Badge on Image */}
+          <div className="absolute top-3 right-3">
+            <Card.Badge variant={getStatusVariant(station.status)}>
+              {availablePorts > 0 ? 'Available' : 'Full'}
+            </Card.Badge>
+          </div>
+
+          {/* Overlapped Header on Image */}
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <div className="flex items-start gap-3 mb-2">
+              {/* <div className="flex-shrink-0 w-6 h-6 pt-2 rounded-xl  flex items-center justify-center ">
+                <Zap className="w-6 h-6 text-white " fill="green" />
+              </div> */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xl font-bold text-white drop-shadow-lg mb-1 truncate">
+                  {station.name}
+                </h3>
+                <div className="flex items-center gap-2 text-white/90 text-sm drop-shadow">
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                  <p className="truncate">{station.location?.address || 'Address not available'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div className="text-sm text-gray-600 mb-3">
-          <p className="flex items-center mb-1">
-            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {station.location?.address}
-          </p>
+
+        {/* Card Content */}
+        <div className="p-5">
+          {/* Stats */}
+          <Card.Stats 
+            className="mb-4"
+            stats={[
+              { 
+                value: station.totalPorts || 0, 
+                label: 'Total Ports',
+                icon: <Zap className="w-4 h-4" />
+              },
+              { 
+                value: availablePorts, 
+                label: 'Available',
+                icon: <Info className="w-4 h-4" />
+              }
+            ]} 
+          />
+
+          {/* Rating if available */}
+          {station.rating?.average > 0 && (
+            <div className="mb-4">
+              <Card.Rating 
+                rating={station.rating.average} 
+                count={station.rating.count}
+              />
+            </div>
+          )}
+
+          {/* Amenities */}
+          {station.amenities && station.amenities.length > 0 && (
+            <div className="mb-4">
+              <Card.Features 
+                features={station.amenities.slice(0, 3).map(amenity => ({
+                  label: amenity,
+                  icon: getAmenityIcon(amenity)
+                }))}
+              />
+            </div>
+          )}
+
+          {/* Pricing & CTA */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            {station.pricing?.perHour > 0 ? (
+              <Card.Price 
+                price={station.pricing.perHour} 
+                unit="/hour"
+              />
+            ) : (
+              <div className="text-sm text-gray-500">Pricing not available</div>
+            )}
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/stations/${station._id}`);
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg group-hover:scale-105"
+            >
+              <span>View</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
-        
-        <Button
-          variant="primary"
-          className="w-full"
-          onClick={() => navigate(`/stations/${station._id}`)}
-        >
-          View Details
-        </Button>
       </Card>
     );
   }
 
+  // Expanded Modal View (keeping your existing code)
   return (
     <div className="h-full bg-white overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 relative">
-        {/* <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button> */}
-        
-        <div className="pr-12">
-          <h1 className="text-xl font-bold leading-tight">{station.name}</h1>
+      {/* Header with Image */}
+      {station.images?.[0] ? (
+        <div className="relative h-64 overflow-hidden">
+          <img 
+            src={station.images[0]} 
+            alt={station.name}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+            <h1 className="text-3xl font-bold mb-2 drop-shadow-lg">{station.name}</h1>
+            <div className="flex items-center gap-2 text-white/90">
+              <MapPin className="w-5 h-5" />
+              <p className="text-sm drop-shadow">{station.location?.address}</p>
+            </div>
+          </div>
+          <div className="absolute top-4 right-4">
+            <Card.Badge variant={getStatusVariant(station.status)}>
+              {station.status === 'accepted' ? 'Active' : station.status || 'Available'}
+            </Card.Badge>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="relative h-64 bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 flex items-center justify-center">
+          <Zap className="w-32 h-32 text-white opacity-20" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+            <h1 className="text-3xl font-bold mb-2">{station.name}</h1>
+            <div className="flex items-center gap-2 text-white/90">
+              <MapPin className="w-5 h-5" />
+              <p className="text-sm">{station.location?.address}</p>
+            </div>
+          </div>
+          <div className="absolute top-4 right-4">
+            <Card.Badge variant={getStatusVariant(station.status)}>
+              {station.status === 'accepted' ? 'Active' : station.status || 'Available'}
+            </Card.Badge>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        {/* Location Info */}
+        {/* Rating */}
+        {station.rating?.average > 0 && (
+          <div className="mb-6">
+            <Card.Rating 
+              rating={station.rating.average} 
+              count={station.rating.count}
+            />
+          </div>
+        )}
+
+        {/* Stats Grid */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            </svg>
-            Location
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-green-600" />
+            Station Information
           </h2>
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-            <div className="flex items-center text-sm">
-              <span className="font-medium text-gray-700 w-20">Address:</span>
-              <span className="text-gray-600">{station.location?.address}</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 text-center border border-green-200/50">
+              <div className="text-3xl font-bold text-green-600">{station.totalPorts}</div>
+              <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">Total Ports</div>
             </div>
-            <div className="flex items-center text-sm">
-              <span className="font-medium text-gray-700 w-20">Coords:</span>
-              <span className="text-gray-600 font-mono text-xs">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 text-center border border-blue-200/50">
+              <div className="text-3xl font-bold text-blue-600">{availablePorts}</div>
+              <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">Available</div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 text-center border border-purple-200/50">
+              <div className="text-3xl font-bold text-purple-600">{station.stats?.totalBookings || 0}</div>
+              <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">Total Bookings</div>
+            </div>
+            <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-4 text-center border border-orange-200/50">
+              <div className="text-3xl font-bold text-orange-600">{station.stats?.completedBookings || 0}</div>
+              <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">Completed</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Location Details */}
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-green-600" />
+            Location Details
+          </h2>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl p-4 space-y-3 border border-gray-200/50">
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-semibold text-gray-700">Address</span>
+              <span className="text-sm text-gray-600 text-right max-w-xs">{station.location?.address}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold text-gray-700">City</span>
+              <span className="text-sm text-gray-600">{station.city || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold text-gray-700">State</span>
+              <span className="text-sm text-gray-600">{station.state || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold text-gray-700">Coordinates</span>
+              <span className="text-xs text-gray-500 font-mono">
                 {station.location?.latitude?.toFixed(4)}, {station.location?.longitude?.toFixed(4)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Charging Info */}
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Charging Details
-          </h2>
-          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg p-3 text-center border border-gray-200">
-                <div className="text-2xl font-bold text-blue-600">{station.totalPorts}</div>
-                <div className="text-xs text-gray-600 uppercase tracking-wide">
-                  {station.totalPorts === 1 ? 'Port' : 'Ports'}
+        {/* Pricing */}
+        {(station.pricing?.perHour > 0 || station.pricing?.perKWh > 0) && (
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Pricing</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {station.pricing.perHour > 0 && (
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200/50">
+                  <div className="text-sm text-gray-600 mb-1">Per Hour</div>
+                  <div className="text-2xl font-bold text-green-600">₹{station.pricing.perHour}</div>
                 </div>
-              </div>
-              <div className="bg-white rounded-lg p-3 text-center border border-gray-200">
-                <div className="text-2xl font-bold text-green-600">{station.ports?.length || 0}</div>
-                <div className="text-xs text-gray-600 uppercase tracking-wide">
-                  Active Connections
+              )}
+              {station.pricing.perKWh > 0 && (
+                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200/50">
+                  <div className="text-sm text-gray-600 mb-1">Per kWh</div>
+                  <div className="text-2xl font-bold text-blue-600">₹{station.pricing.perKWh}</div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Amenities & Features */}
+        {station.amenities && station.amenities.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Amenities</h2>
+            <Card.Features 
+              features={station.amenities.map(amenity => ({
+                label: amenity,
+                icon: getAmenityIcon(amenity)
+              }))}
+            />
+          </div>
+        )}
+
+        {/* Charger Types */}
+        {station.chargerTypes && station.chargerTypes.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Charger Types</h2>
+            <div className="flex flex-wrap gap-2">
+              {station.chargerTypes.map((type, index) => (
+                <span 
+                  key={index}
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium shadow-md"
+                >
+                  {type}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Operating Hours */}
+        {station.operatingHours && (
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-green-600" />
+              Operating Hours
+            </h2>
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl p-4 border border-gray-200/50">
+              {station.operatingHours.is24x7 ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-semibold text-gray-900">Open 24/7</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Operating Hours</span>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {station.operatingHours.open} - {station.operatingHours.close}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Button
               variant="success"
+              className="w-full"
               onClick={() => {
                 const url = `https://www.google.com/maps?q=${station.location?.latitude},${station.location?.longitude}`;
                 window.open(url, '_blank');
               }}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
+              <Navigation className="w-4 h-4 mr-2" />
               Directions
             </Button>
             <Button
               variant="primary"
+              className="w-full"
               onClick={() => navigate(`/stations/${station._id}`)}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <Info className="w-4 h-4 mr-2" />
               Full Details
             </Button>
             <Button
               variant="success"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
               onClick={() => navigate(`/stations/${station._id}/book`)}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+              <Calendar className="w-4 h-4 mr-2" />
               Book Now
             </Button>
           </div>
         </div>
 
         {/* Additional Info */}
-        <div className="border-t pt-4">
+        <div className="border-t pt-4 mt-6">
           <div className="text-xs text-gray-500 space-y-1">
-            <p>Station ID: {station._id}</p>
-            <p>Last updated: {station.updatedAt ? new Date(station.updatedAt).toLocaleDateString() : 'N/A'}</p>
+            <p className="flex items-center justify-between">
+              <span>Station ID:</span>
+              <span className="font-mono">{station._id}</span>
+            </p>
+            <p className="flex items-center justify-between">
+              <span>Last Updated:</span>
+              <span>{station.updatedAt ? new Date(station.updatedAt).toLocaleDateString() : 'N/A'}</span>
+            </p>
           </div>
         </div>
       </div>

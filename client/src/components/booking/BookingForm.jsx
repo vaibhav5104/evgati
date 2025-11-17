@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import Button from "../ui/Button";
 import { toast } from "react-toastify";
+import { Zap } from "lucide-react";
 
 const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
   const { API, authorizationToken } = useAuth();
@@ -151,9 +152,12 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+            </svg> */}
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl  flex items-center justify-center ">
+                <Zap className="w-8 h-8 text- " fill="green" />
+              </div>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-800">Book Charging Port</h3>
