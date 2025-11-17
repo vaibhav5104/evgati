@@ -12,6 +12,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
+    phone: 0
   });
   const [isLoading, setIsLoading] = useState(false);
   
@@ -23,28 +24,35 @@ const Register = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: name === "phone" ? Number(value) : value,
     }));
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
+
+    const payload = {
+    ...formData,
+    phone: Number(formData.phone), // convert to number
+  };
 
     try {
-      e.preventDefault();
+      // e.preventDefault();
       const response = await fetch(`${API}/api/auth/register`, {
           method: "POST",
           headers: {
               'Content-Type': "application/json"
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify(payload),
       });
       const res_data = await response.json();
+      console.log(res_data);
 
       if (response.ok) {
           storeTokenInLS(res_data.token);
-          setFormData({ name: "", email: "",password: "" });
+          setFormData({ name: "", email: "", password: "", phone: "" });
           // setFormData({ username: "", email: "", phone: "", password: "" });
           toast.success("Registration successful");
           navigate("/");
@@ -92,6 +100,16 @@ const Register = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your full name"
+            />
+
+            <Input
+              label="Phone Number"
+              name="phone"
+              type="number"
+              required
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Enter your Phone number"
             />
 
             <Input

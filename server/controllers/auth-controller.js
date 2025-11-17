@@ -17,14 +17,14 @@ const transporter = nodemailer.createTransport({
 // Register
 const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, phone } = req.body;
 
         const existing = await User.findOne({ email });
         if (existing) {
             return res.status(400).json({ message: "User already exists" });
         }
 
-        const user = await User.create({ name, email, password });
+        const user = await User.create({ name, email, password, phone });
 
         res.status(201).json({
             message: "Registration successful",
@@ -32,6 +32,7 @@ const register = async (req, res) => {
             userId: user._id,
         });
     } catch (error) {
+        console.error(error)
         res.status(500).json({ error: error.message });
     }
 };

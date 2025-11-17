@@ -119,13 +119,8 @@ const Navbar = () => {
   return (
     <>
       {/* Main Navbar */}
-<nav
-  className="sticky top-0 z-50 backdrop-blur-md shadow-sm border-b border-gray-100 bg-cover bg-center"
-  // style={{
-  //   backgroundImage:
-  //     "url('https://images.pexels.com/photos/221421/pexels-photo-221421.jpeg?auto=compress&cs=tinysrgb&w=1600')",
-  // }}
->      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<nav className="fixed top-0 w-full z-50  backdrop-blur-md">
+   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center group">
@@ -229,11 +224,14 @@ const Navbar = () => {
                   </Button>
                 </>
               ) : (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-23">
+                  <Button variant="outline" onClick={() => navigate("/stations")}>
+                    Stations
+                  </Button>
                   <Button variant="outline" onClick={() => navigate("/login")}>
                     Login
                   </Button>
-                  <Button variant="primary" onClick={() => navigate("/register")}>
+                  <Button variant="success" className="" onClick={() => navigate("/register")}>
                     Sign Up
                   </Button>
                 </div>
