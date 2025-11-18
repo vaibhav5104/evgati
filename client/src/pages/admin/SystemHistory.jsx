@@ -43,7 +43,7 @@ const SystemHistory = () => {
     return <div className="p-6 text-gray-500">No history records found yet.</div>;
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white p-6 md:mt-10">
       <h1 className="text-2xl font-bold text-blue-600 mb-6">
         System History
       </h1>

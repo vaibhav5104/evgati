@@ -94,7 +94,7 @@ const Stations = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 h-full flex flex-col justify-center">
           <div className="text-center space-y-4">
-            <h1 className="text-5xl md:text-6xl font-bold text-white drop-shadow-2xl">
+            <h1 className="text-5xl md:text-6xl font-bold text-white drop-shadow-2xl mt-5">
               Find Your Charging Station
             </h1>
             <p className="text-xl text-white/90 drop-shadow-lg max-w-2xl mx-auto">
