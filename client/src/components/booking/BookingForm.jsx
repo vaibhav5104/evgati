@@ -147,7 +147,7 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
   const quickDurationButtons = [1, 2, 4, 6, 8, 12];
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-auto">
+    <div className="rounded-lg shadow-lg p-6 max-w-md w-full mx-auto bg-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
@@ -176,15 +176,15 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 ">
         {/* Port Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Port
           </label>
-          <div className="relative">
+          <div className="relative appearance-none ">
             <select
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:ring-2 focus:ring-gray-500 focus:border-transparent "
               value={form.portId}
               onChange={(e) => setForm({ ...form, portId: e.target.value })}
               required
@@ -196,7 +196,7 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
                 </option>
               ))}
             </select>
-            <svg className="w-5 h-5 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none " fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
@@ -209,7 +209,7 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
           </label>
           <input
             type="datetime-local"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             value={form.startTime}
             onChange={(e) => handleStartTimeChange(e.target.value)}
             min={getCurrentDateTime()}
@@ -229,7 +229,7 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
                   key={hours}
                   type="button"
                   onClick={() => handleDurationChange(hours)}
-                  className="py-2 px-3 text-sm border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  className="py-2 px-3 text-sm border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                 >
                   {hours}h
                 </button>
@@ -245,7 +245,7 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
           </label>
           <input
             type="datetime-local"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:ring-2 focus:ring-red-500 focus:border-transparent"
             value={form.endTime}
             onChange={(e) => setForm({ ...form, endTime: e.target.value })}
             min={form.startTime || getCurrentDateTime()}
@@ -281,7 +281,7 @@ const BookingForm = ({ stationId, station, onSuccess, onClose }) => {
           )}
           <Button
             type="submit"
-            className="flex-1 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-blue-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading || !form.portId || !form.startTime || !form.endTime}
           >
             {loading ? (

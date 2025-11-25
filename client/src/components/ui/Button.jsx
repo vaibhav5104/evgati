@@ -11,10 +11,12 @@ const Button = ({
   type = 'button',
   ...props 
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+const baseClasses =
+  'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none outline-none focus:ring-0 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variants = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    station: 'text-black text-3xl bg-green-600 hover:bg-green-800 hover:text-gray-100 no-decoration focus:ring-0 focus:ring-offset-0',
     black: 'bg-black text-white hover:bg-black focus:ring-blue-500',
     secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
     success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',

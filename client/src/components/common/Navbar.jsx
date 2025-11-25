@@ -3,8 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import Button from "../ui/Button";
 import { 
-  Bell, Home, MapPin, LayoutDashboard, Calendar, Building2, Settings, 
-  Menu, X, Users, FileText, Clock, BarChart3, ClipboardList, User
+  Bell, Home, MapPin, LayoutDashboard, Calendar, Building2,EvCharger, 
+  CircleEllipsis, Users, FileText, Clock, BarChart3, ClipboardList, User
 } from "lucide-react";
 import NotificationDropdown from "../navbar/NotificationDropdown";
 
@@ -35,7 +35,6 @@ const Navbar = () => {
 
   // Define sidebar links based on role
   const getSidebarLinks = () => {
-    if (!user) return [];
     
     const adminLinks = [
       { label: 'Manage Stations', path: '/admin/stations', icon: 'stations' },
@@ -56,6 +55,7 @@ const Navbar = () => {
       { label: 'My Bookings', path: '/my-bookings', icon: 'bookings' },
       { label: 'Profile', path: '/profile', icon: 'profile' }
     ];
+    if (!user) return userLinks;
 
     switch (user.role) {
       case 'admin': return adminLinks;
@@ -187,9 +187,9 @@ const Navbar = () => {
                         e.stopPropagation();
                         setIsNotificationOpen(!isNotificationOpen);
                       }}
-                      className="relative p-2.5 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+                      className="relative p-2.5 rounded-full text-gray-600 hover:text-gray-900  transition-all duration-200" 
                     >
-                      <Bell className="w-5 h-5" />
+                      <Bell className="w-7 h-6" color="#54f542" fill="green" />
                       {unreadCount > 0 && (
                         <span className="absolute top-0 right-0 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg animate-pulse">
                           {unreadCount > 9 ? '9+' : unreadCount}
@@ -225,10 +225,10 @@ const Navbar = () => {
                 </>
               ) : (
                 <div className="flex items-center space-x-23">
-                  <Button variant="outline" onClick={() => navigate("/stations")}>
-                    Stations
+                  <Button variant="station"  onClick={() => navigate("/stations")}>
+                    Stations <span className="pl-2"><EvCharger fill="green"/></span>
                   </Button>
-                  <Button variant="outline" onClick={() => navigate("/login")}>
+                  <Button variant="primary" onClick={() => navigate("/login")}>
                     Login
                   </Button>
                   <Button variant="success" className="" onClick={() => navigate("/register")}>
@@ -283,42 +283,44 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Dropdown Menu */}
+        {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 shadow-lg max-h-[80vh] overflow-y-auto">
-            <div className="px-4 py-3 space-y-2">
-              {!user ? (
-                <div className="flex gap-2">
+          <div className="md:hidden fixed top-20 left-1/2 -translate-x-1/2 w-[95%] max-w-md z-40">
+            <div className="backdrop-blur-md bg-gray-600 border border-white/30 shadow-xl rounded-3xl px-4 py-3 space-y-2 max-h-[70vh] overflow-y-auto">
+              {!user ? (<>
+                {/* Login/Signup Buttons */}
+                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200">
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     fullWidth
                     onClick={() => {
-                      navigate("/login");
+                      handleLogout();
                       setMobileMenuOpen(false);
                     }}
                   >
                     Login
                   </Button>
                   <Button
-                    variant="primary"
+                    variant="secondary"
                     fullWidth
                     onClick={() => {
-                      navigate("/register");
+                      handleLogout();
                       setMobileMenuOpen(false);
                     }}
                   >
-                    Sign Up
+                    SignUp
                   </Button>
                 </div>
-              ) : (
+              </>) : (
                 <>
                   {/* User Profile Section */}
                   <Link
                     to="/profile"
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50"
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/60 backdrop-blur-sm transition-all duration-200"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <img
-                      className="h-10 w-10 rounded-full ring-2 ring-gray-200"
+                      className="h-10 w-10 rounded-full ring-2 ring-white/50 shadow-md"
                       src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=3b82f6&color=fff`}
                       alt={user.name}
                     />
@@ -329,7 +331,7 @@ const Navbar = () => {
                   </Link>
 
                   {/* Divider */}
-                  <div className="border-t border-gray-200 my-2"></div>
+                  <div className="border-t border-white/30 my-2"></div>
 
                   {/* Main Navigation Links */}
                   <div className="space-y-1">
@@ -343,10 +345,10 @@ const Navbar = () => {
                         <Link
                           key={link.path}
                           to={link.path}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200 ${
                             isActive
-                              ? "bg-blue-50 text-blue-600"
-                              : "text-gray-700 hover:bg-gray-50"
+                              ? "bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-600 shadow-sm"
+                              : "text-gray-700 hover:bg-white/60 backdrop-blur-sm"
                           }`}
                           onClick={() => setMobileMenuOpen(false)}
                         >
@@ -358,7 +360,7 @@ const Navbar = () => {
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-gray-500 my-2"></div>
+                  <div className="border-t border-white/30 my-2"></div>
 
                   {/* Sidebar Links */}
                   <div className="space-y-1">
@@ -372,10 +374,10 @@ const Navbar = () => {
                         <Link
                           key={link.path}
                           to={link.path}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200 ${
                             isActive
-                              ? "bg-blue-50 text-blue-600"
-                              : "text-gray-700 hover:bg-gray-50"
+                              ? "bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-600 shadow-sm"
+                              : "text-gray-700 hover:bg-white/60 backdrop-blur-sm"
                           }`}
                           onClick={() => setMobileMenuOpen(false)}
                         >
@@ -387,7 +389,7 @@ const Navbar = () => {
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-gray-200 my-2"></div>
+                  <div className="border-t border-white/30 my-2"></div>
 
                   {/* Logout Button */}
                   <Button
@@ -408,24 +410,24 @@ const Navbar = () => {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      {user && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 pb-safe">
-          <div className="grid grid-cols-4 h-16">
-            {filteredMainNavLinks.slice(0, 3).map((link) => {
+      <div className="md:hidden fixed bottom-1 left-1/2 -translate-x-1/2 w-[95%] max-w-md z-50">
+        <div className="backdrop-blur-md border border-white/30 shadow-xl rounded-full px-2 py-2">
+          <div className="grid grid-cols-4 gap-1">
+            {mainNavLinks.slice(0, 3).map((link) => {
               const Icon = link.icon;
               const isActive = isActivePath(link.path);
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex flex-col items-center justify-center gap-1 transition-all duration-200 ${
-                    isActive ? "text-blue-600" : "text-gray-500"
+                  className={`flex flex-col items-center justify-center gap-1 py-2 rounded-full transition-all duration-200 ${
+                    isActive ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-600" : "text-gray-500 hover:bg-white/60"
                   }`}
                 >
                   <div className={`relative ${isActive ? "scale-110" : ""}`}>
                     <Icon className="w-6 h-6" strokeWidth={isActive ? 2.5 : 2} />
                     {isActive && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full" />
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-sm" />
                     )}
                   </div>
                   <span className={`text-xs font-medium ${isActive ? "font-semibold" : ""}`}>
@@ -436,25 +438,45 @@ const Navbar = () => {
             })}
 
             {/* More/Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`flex flex-col items-center justify-center gap-1 transition-all duration-200 ${
-                mobileMenuOpen ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
-              <div className={`relative ${mobileMenuOpen ? "scale-110" : ""}`}>
-                <Menu className="w-6 h-6" strokeWidth={mobileMenuOpen ? 2.5 : 2} />
-                {mobileMenuOpen && (
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full" />
-                )}
-              </div>
-              <span className={`text-xs font-medium ${mobileMenuOpen ? "font-semibold" : ""}`}>
-                More
-              </span>
-            </button>
+            {user ? (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`flex flex-col items-center justify-center gap-1 py-2 rounded-full transition-all duration-200 ${
+                  mobileMenuOpen ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-600" : "text-gray-500 hover:bg-white/60"
+                }`}
+              >
+                <div className={`relative ${mobileMenuOpen ? "scale-110" : ""}`}>
+                  <CircleEllipsis className="w-6 h-6 text-blue-600"  strokeWidth={mobileMenuOpen ? 2.5 : 2} />
+                  {mobileMenuOpen && (
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-sm" />
+                  )}
+                </div>
+                <span className={`text-xs font-medium ${mobileMenuOpen ? "font-semibold" : ""} text-blue-600`}>
+                  More
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`flex flex-col items-center justify-center gap-1 py-2 rounded-full transition-all duration-200 ${
+                  mobileMenuOpen ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-600" : "text-gray-500 hover:bg-white/60"
+                }`}
+              >
+                <div className={`relative ${mobileMenuOpen ? "scale-110" : ""}`}>
+                  <Menu className="w-6 h-6" strokeWidth={mobileMenuOpen ? 2.5 : 2} />
+                  {mobileMenuOpen && (
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-sm" />
+                  )}
+                </div>
+                <span className={`text-xs font-medium ${mobileMenuOpen ? "font-semibold" : ""}`}>
+                  Login
+                </span>
+              </button>
+            )}
           </div>
         </div>
-      )}
+      </div>
+      {/* )} */}
 
       {/* Spacer for mobile bottom nav */}
       {user && <div className="h-16 md:hidden" />}

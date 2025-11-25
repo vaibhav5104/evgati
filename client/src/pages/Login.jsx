@@ -6,6 +6,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Card from "../components/ui/Card";
+import { EvCharger } from "lucide-react";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const Login = () => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,16 +58,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-green-300 ">
       <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-          <p className="text-gray-600 mt-2">Sign in to your EvGati account</p>
+        <div className="text-center mb-2 -mt-15">
+          <div className="flex gap-3 justify-center">
+          <EvCharger className="w-10 h-10" fill="orange"/>
+          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2></div>
+          <p className="text-gray-600 mt-2">Sign In to Your EvGati Account</p>
         </div>
 
         <Card>
@@ -79,17 +79,28 @@ const Login = () => {
               placeholder="Enter your email"
             />
 
-            <Input
-              label="Password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-            />
+            {/* Password with Show/Hide */}
+            <div className="relative">
+              <Input
+                label="Password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Create a password"
+              />
 
-            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+
+            {/* <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -110,7 +121,7 @@ const Login = () => {
                   Forgot password?
                 </Link>
               </div>
-            </div>
+            </div> */}
 
             <Button
               type="submit"
