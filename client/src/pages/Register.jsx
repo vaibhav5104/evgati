@@ -79,13 +79,13 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50 px-4 md:py-20 py-12 ">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-gray-800 px-4 md:py-20 py-20 ">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
         <div className="flex gap-3 justify-center">
           <EvCharger className="w-10 h-10" fill="orange"/>
-          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2></div>
-          <p className="text-gray-600 mt-2">Join EvGati and start your EV journey</p>
+          <h2 className="text-3xl font-bold text-gray-300">Create Account</h2></div>
+          <p className="text-gray-300 mt-2">Join EvGati and start your EV journey</p>
         </div>
 
         <Card>
