@@ -7,6 +7,8 @@ import {
   CircleEllipsis, Users, FileText, Clock, BarChart3, ClipboardList, User
 } from "lucide-react";
 import NotificationDropdown from "../navbar/NotificationDropdown";
+import { IoMdLogIn } from "react-icons/io";
+import { SiGnuprivacyguard } from "react-icons/si";
 
 const Navbar = () => {
   const { user, LogoutUser } = useAuth();
@@ -69,6 +71,12 @@ const Navbar = () => {
     { label: "Home", path: "/", roles: ["user", "admin", "owner"], icon: Home },
     { label: "Stations", path: "/stations", roles: ["user", "admin", "owner"], icon: MapPin },
     { label: "Dashboard", path: "/dashboard", roles: ["user", "admin", "owner"], icon: LayoutDashboard },
+  ];
+  const noAUthMainNavLinks = [
+    { label: "Home", path: "/", roles: ["user", "admin", "owner"], icon: Home },
+    { label: "Stations", path: "/stations", roles: ["user", "admin", "owner"], icon: MapPin },
+    { label: "Login", path: "/login", roles: ["user", "admin", "owner"], icon: IoMdLogIn },
+    { label: "SignUp", path: "/register", roles: ["user", "admin", "owner"], icon: SiGnuprivacyguard },
   ];
 
   const filteredMainNavLinks = mainNavLinks.filter(
@@ -410,10 +418,33 @@ const Navbar = () => {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-1 left-1/2 -translate-x-1/2 w-[95%] max-w-md z-50">
+      <div className="md:hidden fixed bottom-2 left-1/2 -translate-x-1/2 w-[95%] max-w-md z-50">
         <div className="backdrop-blur-md border border-white/30 shadow-xl rounded-full px-2 py-2">
           <div className="grid grid-cols-4 gap-1">
-            {mainNavLinks.slice(0, 3).map((link) => {
+            {user && mainNavLinks.slice(0, 3).map((link) => {
+              const Icon = link.icon;
+              const isActive = isActivePath(link.path);
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`flex flex-col items-center justify-center gap-1 py-2 rounded-full transition-all duration-200 ${
+                    isActive ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-600" : "text-gray-500 hover:bg-white/60"
+                  }`}
+                >
+                  <div className={`relative ${isActive ? "scale-110" : ""}`}>
+                    <Icon className="w-6 h-6" strokeWidth={isActive ? 2.5 : 2} />
+                    {isActive && (
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-sm" />
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium ${isActive ? "font-semibold" : ""}`}>
+                    {link.label}
+                  </span>
+                </Link>
+              );
+            })}
+            {!user && noAUthMainNavLinks.slice(0, 4).map((link) => {
               const Icon = link.icon;
               const isActive = isActivePath(link.path);
               return (
@@ -438,7 +469,7 @@ const Navbar = () => {
             })}
 
             {/* More/Menu Button */}
-            {user ? (
+            {user && (
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className={`flex flex-col items-center justify-center gap-1 py-2 rounded-full transition-all duration-200 ${
@@ -453,23 +484,6 @@ const Navbar = () => {
                 </div>
                 <span className={`text-xs font-medium ${mobileMenuOpen ? "font-semibold" : ""} text-blue-600`}>
                   More
-                </span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`flex flex-col items-center justify-center gap-1 py-2 rounded-full transition-all duration-200 ${
-                  mobileMenuOpen ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-600" : "text-gray-500 hover:bg-white/60"
-                }`}
-              >
-                <div className={`relative ${mobileMenuOpen ? "scale-110" : ""}`}>
-                  <Menu className="w-6 h-6" strokeWidth={mobileMenuOpen ? 2.5 : 2} />
-                  {mobileMenuOpen && (
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-sm" />
-                  )}
-                </div>
-                <span className={`text-xs font-medium ${mobileMenuOpen ? "font-semibold" : ""}`}>
-                  Login
                 </span>
               </button>
             )}

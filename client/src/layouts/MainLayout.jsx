@@ -9,7 +9,7 @@ const MainLayout = () => {
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="bg-gray-900 shadow-md py-12">
+      <footer className="bg-gray-900 shadow-md py-25 md:py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>

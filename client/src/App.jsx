@@ -64,16 +64,16 @@ export const App = () => {
             </Route>
 
             {/* Auth routes with AuthLayout */}
-            <Route path="/auth" element={<AuthLayout />}>
+            <Route path="/auth" element={<MainLayout />}>
               <Route path="login" element={<Login />} />
               <Route path="register" element={<Register />} />
             </Route>
 
             {/* Legacy auth routes (redirect to new structure) */}
-            <Route path="/login" element={<AuthLayout />}>
+            <Route path="/login" element={<MainLayout />}>
               <Route index element={<Login />} />
             </Route>
-            <Route path="/register" element={<AuthLayout />}>
+            <Route path="/register" element={<MainLayout />}>
               <Route index element={<Register />} />
             </Route>
 

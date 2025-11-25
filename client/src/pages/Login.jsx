@@ -58,13 +58,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-green-300 ">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-2 -mt-15">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-gray-800 ">
+      <div className="max-w-md w-full md:py-30 md:-mb-30">
+        <div className="text-center mb-2 -mt-15 ">
           <div className="flex gap-3 justify-center">
           <EvCharger className="w-10 h-10" fill="orange"/>
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2></div>
-          <p className="text-gray-600 mt-2">Sign In to Your EvGati Account</p>
+          <h2 className="text-3xl font-bold text-gray-300">Welcome Back</h2></div>
+          <p className="text-gray-300 mt-2">Sign In to Your EvGati Account</p>
         </div>
 
         <Card>
