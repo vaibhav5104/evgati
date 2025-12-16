@@ -125,18 +125,32 @@ export const App = () => {
               <Route path="history" element={<SystemHistory />} />
             </Route>
 
-            {/* Owner routes */}
-            <Route path="/owner/*" element={
-              <ProtectedRoute requiredRole="owner">
-                <DashboardLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<OwnerDashboard />} />
-              <Route path="stations" element={<MyStations />} />
-              <Route path="requests" element={<StationRequests />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="history" element={<OwnerHistory />} />
-            </Route>
+{/* OWNER ROUTES — Dashboard layout */}
+<Route
+  path="/owner"
+  element={
+    <ProtectedRoute requiredRole="owner">
+      <DashboardLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route index element={<OwnerDashboard />} />
+  <Route path="stations" element={<MyStations />} />
+  <Route path="requests" element={<StationRequests />} />
+  <Route path="history" element={<OwnerHistory />} />
+</Route>
+
+{/* OWNER ANALYTICS — Main layout */}
+<Route
+  path="/owner/analytics"
+  element={
+    <ProtectedRoute requiredRole="owner">
+      <MainLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route index element={<Analytics />} />
+</Route>
 
             {/* Error routes */}
             <Route path="/unauthorized" element={<Unauthorized />} />

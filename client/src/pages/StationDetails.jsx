@@ -543,12 +543,12 @@ const StationDetails = () => {
                 
                 <div className="bg-gray-100 rounded-lg overflow-hidden">
                   <StationMap
-                    initialCenter={[station.location?.latitude || 20.5937, station.location?.longitude || 78.9629]}
-                    zoom={6}
-                    stations={[station]}
-                    userLocation={userLocation}
-                    showUserLocation={true}
-                    height="400px"
+                    stations={[station]} // ⬅ ONLY THIS STATION
+                    initialCenter={[
+                      station.location.latitude,
+                      station.location.longitude
+                    ]}
+                    zoom={14}
                   />
                 </div>
 
@@ -565,7 +565,7 @@ const StationDetails = () => {
                         href={`https://www.google.com/maps/dir/${userLocation.latitude},${userLocation.longitude}/${station.location?.latitude},${station.location?.longitude}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        className="inline-flex items-center px-4 py-2 bg-blue-200 text-black rounded-lg hover:bg-blue-500 transition-colors text-sm font-medium"
                       >
                         🗺️ Get Directions
                       </a>

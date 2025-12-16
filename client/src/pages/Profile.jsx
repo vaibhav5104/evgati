@@ -9,7 +9,7 @@ const Profile = () => {
     name: "",
     email: "",
     phone: "",
-    address: ""
+    // address: ""
   });
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +19,7 @@ const Profile = () => {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        address: user.address || ""
+        // address: user.address || ""
       });
     }
   }, [user]);
@@ -83,7 +83,7 @@ const Profile = () => {
               />
             </div>
             
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">Address</label>
               <textarea
                 name="address"
@@ -92,7 +92,7 @@ const Profile = () => {
                 className="w-full border rounded px-3 py-2"
                 rows={3}
               />
-            </div>
+            </div> */}
             
             <Button type="submit" color="primary" disabled={loading}>
               {loading ? "Updating..." : "Update Profile"}

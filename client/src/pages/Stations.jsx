@@ -86,7 +86,8 @@ const Stations = () => {
       <div 
         className="relative bg-cover bg-center h-72 overflow-hidden"
         style={{
-          backgroundImage: "url('https://images.pexels.com/photos/1119976/pexels-photo-1119976.jpeg?auto=compress&cs=tinysrgb&w=1600')",
+          // backgroundImage: "url('https://images.pexels.com/photos/1119976/pexels-photo-1119976.jpeg?auto=compress&cs=tinysrgb&w=1600')",
+          backgroundImage: "url('https://t3.ftcdn.net/jpg/03/03/63/38/360_F_303633868_4A2UUVs9EaY3xBsouesazwTt8TI5SPJM.jpg')",
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-transparent" />
@@ -215,9 +216,7 @@ const Stations = () => {
 
                 {view === 'map' && (
                   <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
-                    <StationMap 
-                      onStationSelect={handleStationSelect} 
-                    />
+                    <StationMap onStationSelect={handleStationSelect} />
                   </div>
                 )}
               </div>

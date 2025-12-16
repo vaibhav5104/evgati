@@ -24,7 +24,7 @@ router.get("/user/:id",authControllers.userById);
 router.get("/users", authMiddleware, isAdmin, authControllers.allUsers);
 
 // Update user by id (admin only)
-router.put("/user/:id", authMiddleware, isAdmin, authControllers.updateUser);
+router.put("/user/:id", authMiddleware, authControllers.updateUser);
 
 // Delete user by id (admin only)
 router.delete("/user/:id", authMiddleware, isAdmin, authControllers.deleteUser);

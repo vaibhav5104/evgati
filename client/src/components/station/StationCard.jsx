@@ -240,7 +240,7 @@ const StationCard = ({ station, onClose, isExpanded = false }) => {
             </div>
             <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-4 text-center border border-orange-200/50">
               <div className="text-3xl font-bold text-orange-600">{station.stats?.completedBookings || 0}</div>
-              <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">Completed</div>
+              <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">Comp- leted</div>
             </div>
           </div>
         </div>

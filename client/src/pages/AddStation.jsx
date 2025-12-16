@@ -186,7 +186,7 @@ const AddStation = () => {
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Map Section */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden z-0">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
               <div className="flex items-center">
                 <img 
