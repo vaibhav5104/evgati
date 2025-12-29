@@ -6,6 +6,7 @@ import { ScrollToTop } from './components/common/ScrollToTop';
 import { LoadingFallback } from './components/common/LoadingFallback';
 import { NotFound } from './pages/NotFound';
 import { Unauthorized } from './pages/Unauthorized';
+import { Analytics } from '@vercel/analytics/react'
 
 // Lazy load page components that exist
 const Home = lazy(() => import('./pages/Home'));
@@ -36,7 +37,7 @@ const SystemHistory = lazy(() => import('./pages/admin/SystemHistory'));
 const OwnerDashboard = lazy(() => import('./pages/owner/OwnerDashboard'));
 const MyStations = lazy(() => import('./pages/owner/MyStations'));
 const StationRequests = lazy(() => import('./pages/owner/StationRequests'));
-const Analytics = lazy(() => import('./pages/owner/Analytics'));
+const Analytic = lazy(() => import('./pages/owner/Analytics'));
 const OwnerHistory = lazy(() => import('./pages/owner/OwnerHistory'));
 
 // Error boundary component
@@ -125,38 +126,39 @@ export const App = () => {
               <Route path="history" element={<SystemHistory />} />
             </Route>
 
-{/* OWNER ROUTES — Dashboard layout */}
-<Route
-  path="/owner"
-  element={
-    <ProtectedRoute requiredRole="owner">
-      <DashboardLayout />
-    </ProtectedRoute>
-  }
->
-  <Route index element={<OwnerDashboard />} />
-  <Route path="stations" element={<MyStations />} />
-  <Route path="requests" element={<StationRequests />} />
-  <Route path="history" element={<OwnerHistory />} />
-</Route>
+            {/* OWNER ROUTES — Dashboard layout */}
+            <Route
+              path="/owner"
+              element={
+                <ProtectedRoute requiredRole="owner">
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<OwnerDashboard />} />
+              <Route path="stations" element={<MyStations />} />
+              <Route path="requests" element={<StationRequests />} />
+              <Route path="history" element={<OwnerHistory />} />
+            </Route>
 
-{/* OWNER ANALYTICS — Main layout */}
-<Route
-  path="/owner/analytics"
-  element={
-    <ProtectedRoute requiredRole="owner">
-      <MainLayout />
-    </ProtectedRoute>
-  }
->
-  <Route index element={<Analytics />} />
-</Route>
+            {/* OWNER ANALYTICS — Main layout */}
+            <Route
+              path="/owner/analytics"
+              element={
+                <ProtectedRoute requiredRole="owner">
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Analytic />} />
+            </Route>
 
             {/* Error routes */}
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        <Analytics/>
       </Router>
     </ErrorBoundary>
   );
