@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth';
-import { MainLayout, AuthLayout, DashboardLayout } from './layouts';
+import { MainLayout, DashboardLayout } from './layouts';
 import { ScrollToTop } from './components/common/ScrollToTop';
 import { LoadingFallback } from './components/common/LoadingFallback';
 import { NotFound } from './pages/NotFound';
@@ -27,7 +27,7 @@ const Bookings = lazy(() => import('./pages/booking/Bookings'));
 const BookingHistory = lazy(() => import('./pages/booking/BookingHistory'));
 
 // Admin pages 
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+// const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const ManageStations = lazy(() => import('./pages/admin/ManageStations'));
 const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'));
 const PendingApprovals = lazy(() => import('./pages/admin/PendingApprovals'));
@@ -119,7 +119,7 @@ export const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }>
-              <Route path="any" element={<AdminDashboard />} />
+              {/* <Route path="any" element={<AdminDashboard />} /> */}
               <Route path="stations" element={<ManageStations />} />
               <Route path="users" element={<ManageUsers />} />
               <Route path="pending" element={<PendingApprovals />} />
