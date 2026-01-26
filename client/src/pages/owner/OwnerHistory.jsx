@@ -149,7 +149,7 @@ const OwnerHistory = () => {
                 </div>
                 
                 <div className="border-t border-gray-200 pt-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-sm">
                         <div>
                             <p className="text-gray-500">Port</p>
                             <p className="font-medium text-gray-700">#{log.portId}</p>
@@ -161,6 +161,10 @@ const OwnerHistory = () => {
                         <div>
                             <p className="text-gray-500">Logged On</p>
                             <p className="font-medium text-gray-700">{formatDateTime(log.createdAt)}</p>
+                        </div>
+                        <div>
+                            <p className="text-gray-500">Revenue</p>
+                            <p className="font-medium text-gray-700">₹{(log.totalCost)}</p>
                         </div>
                     </div>
                 </div>

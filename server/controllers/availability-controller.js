@@ -307,15 +307,28 @@ const getAvailability = async (req, res) => {
 
     // Archive expired bookings into History
     if (expiredBookings.length > 0) {
-      const historyDocs = expiredBookings.map((b) => ({
-        stationId: station._id,
-        ownerId: station.owner,   // ✅ fixed
-        userId: b.userId,
-        portId: b.portId,
-        startTime: b.startTime,
-        endTime: b.endTime,
-        status: b.status          // ✅ keep original status (pending, accepted, rejected, etc.)
-      }));
+      const historyDocs = expiredBookings.map((b) => {
+        const start = new Date(b.startTime);
+        const end = new Date(b.endTime);
+
+        const durationMs = end - start;
+
+        // Safety check to avoid corrupt data
+        if (durationMs <= 0) return null;
+
+        const durationHours = durationMs / (1000 * 60 * 60);
+
+        return {
+          stationId: station._id,
+          ownerId: station.owner,
+          userId: b.userId,
+          portId: b.portId,
+          startTime: b.startTime,
+          endTime: b.endTime,
+          status: b.status,
+          totalCost: station.pricing.perHour * Math.ceil(durationHours)
+        };
+      }).filter(Boolean); // removes any null entries
 
       await History.insertMany(historyDocs);
     }
@@ -581,15 +594,29 @@ const clearExpiredBookingsForAllStations = async (req, res) => {
 
       // ✅ Save expired bookings into history before removing
       if (expiredBookings.length > 0) {
-        const historyDocs = expiredBookings.map((b) => ({
-          stationId: station._id,
-          ownerId: station.owner,
-          userId: b.userId,
-          portId: b.portId,
-          startTime: b.startTime,
-          endTime: b.endTime,
-          status: b.status
-        }));
+        const historyDocs = expiredBookings.map((b) => {
+          const start = new Date(b.startTime);
+          const end = new Date(b.endTime);
+
+          const durationMs = end - start;
+
+          // Safety check to avoid corrupt data
+          if (durationMs <= 0) return null;
+
+          const durationHours = durationMs / (1000 * 60 * 60);
+
+          return {
+            stationId: station._id,
+            ownerId: station.owner,
+            userId: b.userId,
+            portId: b.portId,
+            startTime: b.startTime,
+            endTime: b.endTime,
+            status: b.status,
+            totalCost: station.pricing.perHour * Math.ceil(durationHours)
+          };
+        }).filter(Boolean); // removes any null entries
+
         await History.insertMany(historyDocs);
       }
 

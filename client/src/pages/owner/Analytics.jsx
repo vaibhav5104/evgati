@@ -69,43 +69,70 @@ const Analytics = () => {
   const metrics = useMemo(() => {
     if (!analyticsData.history) return {};
 
-    const now = new Date();
-    const timeFilter = (date) => {
-      const d = new Date(date);
-      if (timeRange === 'weekly') {
-        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-        return d >= weekAgo;
-      } else if (timeRange === 'monthly') {
-        const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-        return d >= monthAgo;
-      } else {
-        const yearAgo = new Date(now - 365 * 24 * 60 * 60 * 1000);
-        return d >= yearAgo;
+    const now = Date.now();
+
+    let cutoff;
+    if (timeRange === 'weekly') {
+      cutoff = now - 7 * 24 * 60 * 60 * 1000;
+    } else if (timeRange === 'monthly') {
+      cutoff = now - 30 * 24 * 60 * 60 * 1000;
+    } else {
+      cutoff = now - 365 * 24 * 60 * 60 * 1000;
+    }
+
+    let totalBookings = 0;
+    let acceptedBookings = 0;
+    let rejectedBookings = 0;
+    let pendingBookings = 0;
+    let totalDuration = 0;
+    let revenue = 0;
+    const uniqueUsersSet = new Set();
+
+    for (const h of analyticsData.history) {
+      const createdAt = new Date(h.createdAt).getTime();
+      if (createdAt < cutoff) continue;
+      if (selectedStation !== 'all' && h.stationId._id !== selectedStation) continue;
+
+      totalBookings++;
+      uniqueUsersSet.add(h.userId._id);
+
+      // Count by status + revenue
+      if (h.status === 'accepted') {
+        acceptedBookings++;
+        revenue += h.totalCost || 0;
+      } else if (h.status === 'rejected') {
+        rejectedBookings++;
+      } else if (h.status === 'pending') {
+        pendingBookings++;
       }
-    };
 
-    const filteredHistory = analyticsData.history.filter(h => 
-      timeFilter(h.createdAt) && 
-      (selectedStation === 'all' || h.stationId._id === selectedStation)
-    );
+      // Duration in hours
+      const duration =
+        (new Date(h.endTime).getTime() - new Date(h.startTime).getTime()) /
+        (1000 * 60 * 60);
 
-    const totalBookings = filteredHistory.length;
-    const acceptedBookings = filteredHistory.filter(h => h.status === 'accepted').length;
-    const rejectedBookings = filteredHistory.filter(h => h.status === 'rejected').length;
-    const pendingBookings = filteredHistory.filter(h => h.status === 'pending').length;
-    
-    const acceptanceRate = totalBookings > 0 ? (acceptedBookings / totalBookings * 100).toFixed(1) : 0;
-    
-    const avgDuration = filteredHistory.reduce((acc, h) => {
-      const duration = (new Date(h.endTime) - new Date(h.startTime)) / (1000 * 60 * 60);
-      return acc + duration;
-    }, 0) / (filteredHistory.length || 1);
+      totalDuration += duration > 0 ? duration : 0;
+    }
 
-    const avgRating = analyticsData.comments.length > 0
-      ? (analyticsData.comments.reduce((acc, c) => acc + c.rating, 0) / analyticsData.comments.length).toFixed(1)
-      : 0;
+    const acceptanceRate =
+      totalBookings > 0
+        ? ((acceptedBookings / totalBookings) * 100).toFixed(1)
+        : 0;
 
-    const revenue = acceptedBookings * 150; // Assuming ₹150 per booking
+    const avgDuration =
+      totalBookings > 0 ? (totalDuration / totalBookings).toFixed(1) : 0;
+
+    const avgRating =
+      analyticsData.comments?.length > 0
+        ? (
+            analyticsData.comments.reduce((acc, c) => acc + c.rating, 0) /
+            analyticsData.comments.length
+          ).toFixed(1)
+        : 0;
+
+    const totalStations = analyticsData.stations?.length || 0;
+    const totalPorts =
+      analyticsData.stations?.reduce((acc, s) => acc + (s.totalPorts || 0), 0) || 0;
 
     return {
       totalBookings,
@@ -113,14 +140,15 @@ const Analytics = () => {
       rejectedBookings,
       pendingBookings,
       acceptanceRate,
-      avgDuration: avgDuration.toFixed(1),
+      avgDuration,
       avgRating,
       revenue,
-      totalStations: analyticsData.stations.length,
-      totalPorts: analyticsData.stations.reduce((acc, s) => acc + s.totalPorts, 0),
-      uniqueUsers: new Set(filteredHistory.map(h => h.userId._id)).size
+      totalStations,
+      totalPorts,
+      uniqueUsers: uniqueUsersSet.size
     };
   }, [analyticsData, timeRange, selectedStation]);
+
 
   // Prepare chart data
   const chartData = useMemo(() => {
@@ -141,7 +169,7 @@ const Analytics = () => {
       }
       timeSeriesData[key].bookings++;
       if (h.status === 'accepted') {
-        timeSeriesData[key].revenue += 150;
+        timeSeriesData[key].revenue += h.totalCost;
       }
     });
 
